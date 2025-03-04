@@ -1,0 +1,853 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Pendientes de Pago</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .container {
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 5px;
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 20px;
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    .tab.active {
+      background-color: white;
+      border-bottom: 1px solid white;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    textarea,
+    input[type="search"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    textarea {
+      height: 100px;
+      resize: vertical;
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .btn-export {
+      background-color: #2196F3;
+      color: white;
+      margin-right: 10px;
+    }
+    .btn-import {
+      background-color: #2196F3;
+      color: white;
+      margin-right: 10px;
+    }
+    .btn-danger {
+      background-color: #f44336;
+      color: white;
+    }
+    .search-container {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    /* La columna de ACCIONES tendrá esta clase para poder ocultarla en la previsualización */
+    .acciones-col { }
+    .info-message {
+      padding: 10px;
+      background-color: #e3f2fd;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+    .total-row {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+    .action-btn {
+      background: none;
+      border: none;
+      color: blue;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 0;
+      margin-right: 10px;
+    }
+    .btn-pagado {
+      color: green;
+    }
+    /* Estilos para el contenedor de previsualización */
+    #preview-container {
+      margin-top: 20px;
+      display: none;
+      text-align: center;
+    }
+    #preview-container img {
+      max-width: 100%;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SISTEMA DE PENDIENTES DE PAGO</h1>
+    
+    <div class="tabs">
+      <div class="tab active" id="tab-pendientes">Pendientes</div>
+      <div class="tab" id="tab-historial">Historial de Pagos</div>
+    </div>
+    
+    <div id="pendientes-content">
+      <div class="form-group">
+        <label for="fecha">FECHA:</label>
+        <input type="date" id="fecha" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="nombre">NOMBRE:</label>
+        <input type="text" id="nombre" placeholder="Ingrese nombre" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="descripcion">DESCRIPCIÓN:</label>
+        <textarea id="descripcion" placeholder="Ingrese descripción" required></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="total">TOTAL:</label>
+        <input type="number" id="total" placeholder="0.00" step="0.01" min="0" required>
+      </div>
+      
+      <button id="btn-agregar" class="btn-primary">Agregar</button>
+      
+      <div class="search-container">
+        <label for="buscar">Buscar registros:</label>
+        <input type="search" id="buscar" placeholder="Buscar por nombre, fecha o descripción">
+      </div>
+      
+      <table id="tabla-pendientes">
+        <thead>
+          <tr>
+            <th>FECHA</th>
+            <th>NOMBRE</th>
+            <th>DESCRIPCIÓN</th>
+            <th>TOTAL</th>
+            <th class="acciones-col">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody id="pendientes-body">
+          <!-- Los datos se cargarán dinámicamente -->
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="3" style="text-align: right;">TOTAL:</td>
+            <td id="suma-total">0.00</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+      
+      <div class="info-message">
+        Los datos se almacenan temporalmente en esta sesión. Para guardarlos permanentemente, use las opciones de exportación.
+      </div>
+      
+      <div>
+        <button id="exportar-json" class="btn-export">Exportar JSON</button>
+        <button id="exportar-excel" class="btn-export">Exportar Excel</button>
+        <button id="importar-json" class="btn-import">Importar JSON</button>
+        <button id="importar-excel" class="btn-import">Importar Excel</button>
+        <button id="limpiar-datos" class="btn-danger">Limpiar Todos los Datos</button>
+      </div>
+      
+      <!-- Botón para previsualizar la imagen -->
+      <div style="margin-top: 20px;">
+        <button id="previsualizar-imagen" class="btn-export">Previsualizar Imagen</button>
+      </div>
+      
+      <!-- Contenedor para la previsualización de la imagen -->
+      <div id="preview-container">
+        <h3>Previsualización de Imagen</h3>
+        <img id="preview-image" alt="Previsualización">
+        <br>
+        <button id="copiar-imagen" class="btn-export" style="margin-top:10px;">Copiar Imagen</button>
+      </div>
+    </div>
+    
+    <div id="historial-content" style="display: none;">
+      <h2>Historial de Pagos</h2>
+      
+      <div class="search-container">
+        <label for="buscar-historial">Buscar en historial:</label>
+        <input type="search" id="buscar-historial" placeholder="Buscar por nombre, fecha o descripción">
+      </div>
+      
+      <table id="tabla-historial">
+        <thead>
+          <tr>
+            <th>FECHA PAGO</th>
+            <th>FECHA REGISTRO</th>
+            <th>NOMBRE</th>
+            <th>DESCRIPCIÓN</th>
+            <th>TOTAL</th>
+          </tr>
+        </thead>
+        <tbody id="historial-body">
+          <!-- Los datos del historial se cargarán dinámicamente -->
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="4" style="text-align: right;">TOTAL PAGADO:</td>
+            <td id="suma-total-historial">0.00</td>
+          </tr>
+        </tfoot>
+      </table>
+      
+      <div class="info-message">
+        El historial muestra todos los pagos completados.
+      </div>
+      
+      <div>
+        <button id="exportar-historial-json" class="btn-export">Exportar Historial JSON</button>
+        <button id="exportar-historial-excel" class="btn-export">Exportar Historial Excel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Almacenamiento en memoria (en lugar de localStorage)
+    const memoryStorage = {
+      pendientes: [],
+      historial: [],
+      
+      getPendientes: function() {
+        return this.pendientes;
+      },
+      
+      setPendientes: function(newData) {
+        this.pendientes = newData;
+      },
+      
+      getHistorial: function() {
+        return this.historial;
+      },
+      
+      setHistorial: function(newData) {
+        this.historial = newData;
+      },
+      
+      addToHistorial: function(pendiente) {
+        const pagoRegistro = {
+          ...pendiente,
+          fechaPago: new Date().toISOString().split('T')[0]
+        };
+        this.historial.push(pagoRegistro);
+      },
+      
+      clearData: function() {
+        this.pendientes = [];
+        this.historial = [];
+      }
+    };
+    
+    // Variables globales
+    let modoEdicion = false;
+    let idEdicion = null;
+    const btnAgregar = document.getElementById('btn-agregar');
+    
+    // Cargar datos al iniciar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      // Establecer la fecha actual por defecto
+      document.getElementById('fecha').valueAsDate = new Date();
+      
+      // Configurar manejadores de eventos
+      configurarEventos();
+      
+      // Cargar la tabla
+      cargarDatos();
+      cargarHistorial();
+    });
+    
+    function configurarEventos() {
+      // Cambio de pestañas
+      document.getElementById('tab-pendientes').addEventListener('click', function() {
+        document.getElementById('tab-pendientes').classList.add('active');
+        document.getElementById('tab-historial').classList.remove('active');
+        document.getElementById('pendientes-content').style.display = 'block';
+        document.getElementById('historial-content').style.display = 'none';
+      });
+      
+      document.getElementById('tab-historial').addEventListener('click', function() {
+        document.getElementById('tab-historial').classList.add('active');
+        document.getElementById('tab-pendientes').classList.remove('active');
+        document.getElementById('pendientes-content').style.display = 'none';
+        document.getElementById('historial-content').style.display = 'block';
+        cargarHistorial(); // Recargar el historial cuando se cambia a esa pestaña
+      });
+      
+      // Agregar nuevo pendiente
+      btnAgregar.addEventListener('click', function() {
+        guardarRegistro();
+      });
+      
+      // Buscar registros
+      document.getElementById('buscar').addEventListener('input', function() {
+        cargarDatos();
+      });
+      
+      // Buscar en historial
+      document.getElementById('buscar-historial').addEventListener('input', function() {
+        cargarHistorial();
+      });
+      
+      // Exportar JSON (Pendientes)
+      document.getElementById('exportar-json').addEventListener('click', function() {
+        const pendientes = memoryStorage.getPendientes();
+        const dataStr = JSON.stringify(pendientes, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = 'pendientes_pago.json';
+        
+        let linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+      });
+      
+      // Exportar Excel (CSV) (Pendientes)
+      document.getElementById('exportar-excel').addEventListener('click', function() {
+        const pendientes = memoryStorage.getPendientes();
+        let csvContent = "data:text/csv;charset=utf-8,";
+        
+        // Encabezados
+        csvContent += "ID,Fecha,Nombre,Descripción,Total\n";
+        
+        // Datos
+        pendientes.forEach(function(item) {
+          csvContent += `${item.id},${item.fecha},${item.nombre.replace(/,/g, ';')},${item.descripcion.replace(/,/g, ';')},${item.total}\n`;
+        });
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "pendientes_pago.csv");
+        document.body.appendChild(link);
+        link.click();
+      });
+      
+      // Exportar JSON (Historial)
+      document.getElementById('exportar-historial-json').addEventListener('click', function() {
+        const historial = memoryStorage.getHistorial();
+        const dataStr = JSON.stringify(historial, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = 'historial_pagos.json';
+        
+        let linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+      });
+      
+      // Exportar Excel (CSV) (Historial)
+      document.getElementById('exportar-historial-excel').addEventListener('click', function() {
+        const historial = memoryStorage.getHistorial();
+        let csvContent = "data:text/csv;charset=utf-8,";
+        
+        // Encabezados
+        csvContent += "ID,Fecha Pago,Fecha Registro,Nombre,Descripción,Total\n";
+        
+        // Datos
+        historial.forEach(function(item) {
+          csvContent += `${item.id},${item.fechaPago},${item.fecha},${item.nombre.replace(/,/g, ';')},${item.descripcion.replace(/,/g, ';')},${item.total}\n`;
+        });
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "historial_pagos.csv");
+        document.body.appendChild(link);
+        link.click();
+      });
+      
+      // Importar JSON
+      document.getElementById('importar-json').addEventListener('click', function() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        
+        input.onchange = e => {
+          const file = e.target.files[0];
+          const reader = new FileReader();
+          
+          reader.onload = function(event) {
+            try {
+              const data = JSON.parse(event.target.result);
+              if (Array.isArray(data)) {
+                memoryStorage.setPendientes(data);
+                cargarDatos();
+                alert('Datos importados correctamente.');
+              } else {
+                alert('El formato del archivo no es correcto.');
+              }
+            } catch (error) {
+              alert('Error al procesar el archivo: ' + error);
+            }
+          };
+          
+          reader.readAsText(file);
+        };
+        
+        input.click();
+      });
+      
+      // Importar Excel (CSV)
+      document.getElementById('importar-excel').addEventListener('click', function() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.csv';
+        
+        input.onchange = e => {
+          const file = e.target.files[0];
+          const reader = new FileReader();
+          
+          reader.onload = function(event) {
+            try {
+              const text = event.target.result;
+              const lines = text.split('\n');
+              const result = [];
+              
+              // Procesar cada línea (ignorando la cabecera)
+              for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                
+                const parts = lines[i].split(',');
+                if (parts.length >= 5) {
+                  result.push({
+                    id: parseInt(parts[0]) || Date.now() + i,
+                    fecha: parts[1],
+                    nombre: parts[2],
+                    descripcion: parts[3],
+                    total: parseFloat(parts[4]) || 0
+                  });
+                }
+              }
+              
+              if (result.length > 0) {
+                memoryStorage.setPendientes(result);
+                cargarDatos();
+                alert('Datos importados correctamente.');
+              } else {
+                alert('No se pudieron importar datos del archivo.');
+              }
+            } catch (error) {
+              alert('Error al procesar el archivo: ' + error);
+            }
+          };
+          
+          reader.readAsText(file);
+        };
+        
+        input.click();
+      });
+      
+      // Limpiar todos los datos
+      document.getElementById('limpiar-datos').addEventListener('click', function() {
+        if (confirm('¿Está seguro que desea eliminar todos los datos (pendientes e historial)? Esta acción no se puede deshacer.')) {
+          memoryStorage.clearData();
+          cargarDatos();
+          cargarHistorial();
+          alert('Todos los datos han sido eliminados.');
+        }
+      });
+      
+      // Previsualizar la imagen (ocultando la columna de ACCIONES)
+      document.getElementById('previsualizar-imagen').addEventListener('click', function () {
+        capturarTabla();
+      });
+      
+      // Evento para copiar la imagen previsualizada al portapapeles
+      document.getElementById('copiar-imagen').addEventListener('click', function () {
+        const previewImage = document.getElementById('preview-image');
+        // Usar fetch para convertir el data URL en un Blob y luego copiarlo
+        fetch(previewImage.src)
+          .then(response => response.blob())
+          .then(blob => {
+            const item = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([item]).then(() => {
+              alert("Imagen copiada al portapapeles");
+            }).catch(err => {
+              alert("Error al copiar la imagen: " + err);
+            });
+          });
+      });
+    }
+    
+    // Función para guardar un registro (nuevo o editado)
+    function guardarRegistro() {
+      const fecha = document.getElementById('fecha').value;
+      const nombre = document.getElementById('nombre').value;
+      const descripcion = document.getElementById('descripcion').value;
+      const total = parseFloat(document.getElementById('total').value);
+      
+      // Validación básica
+      if (!fecha || !nombre || !descripcion || isNaN(total) || total <= 0) {
+        alert('Por favor complete todos los campos correctamente.');
+        return;
+      }
+      
+      // Obtener datos existentes
+      let pendientes = memoryStorage.getPendientes();
+      
+      if (modoEdicion && idEdicion !== null) {
+        // Encontrar y actualizar el registro
+        const index = pendientes.findIndex(item => item.id == idEdicion);
+        if (index !== -1) {
+          pendientes[index] = {
+            id: parseInt(idEdicion),
+            fecha: fecha,
+            nombre: nombre,
+            descripcion: descripcion,
+            total: total
+          };
+        }
+        
+        // Restablecer el modo de edición
+        modoEdicion = false;
+        idEdicion = null;
+        btnAgregar.textContent = 'Agregar';
+      } else {
+        // Crear nuevo registro
+        const nuevoRegistro = {
+          id: Date.now(), // ID único basado en timestamp
+          fecha: fecha,
+          nombre: nombre,
+          descripcion: descripcion,
+          total: total
+        };
+        
+        // Agregar a la lista
+        pendientes.push(nuevoRegistro);
+      }
+      
+      // Guardar los cambios
+      memoryStorage.setPendientes(pendientes);
+      
+      // Limpiar formulario
+      document.getElementById('nombre').value = '';
+      document.getElementById('descripcion').value = '';
+      document.getElementById('total').value = '';
+      document.getElementById('fecha').valueAsDate = new Date();
+      
+      // Recargar la tabla
+      cargarDatos();
+    }
+    
+    // Función para cargar datos en la tabla de pendientes
+    function cargarDatos() {
+      const tabla = document.getElementById('pendientes-body');
+      const busqueda = document.getElementById('buscar').value.toLowerCase();
+      const pendientes = memoryStorage.getPendientes();
+      
+      // Filtrar por búsqueda si hay texto
+      const pendientesFiltrados = pendientes.filter(function(item) {
+        if (busqueda === '') return true;
+        
+        return (
+          item.nombre.toLowerCase().includes(busqueda) ||
+          item.descripcion.toLowerCase().includes(busqueda) ||
+          item.fecha.includes(busqueda)
+        );
+      });
+      
+      // Limpiar tabla
+      tabla.innerHTML = '';
+      
+      // Calcular total
+      let sumaTotal = 0;
+      
+      // Agregar datos a la tabla
+      pendientesFiltrados.forEach(function(item) {
+        const row = document.createElement('tr');
+        
+        // Formatear fecha para mostrar en formato local
+        let fechaFormateada;
+        try {
+          fechaFormateada = new Date(item.fecha + 'T00:00:00').toLocaleDateString();
+        } catch (e) {
+          fechaFormateada = item.fecha; // Usar la fecha como está si hay error
+        }
+        
+        row.innerHTML = `
+          <td>${fechaFormateada}</td>
+          <td>${item.nombre}</td>
+          <td>${item.descripcion}</td>
+          <td>${item.total.toFixed(2)}</td>
+          <td class="acciones-col">
+            <button class="action-btn btn-editar" data-id="${item.id}">Editar</button>
+            <button class="action-btn btn-eliminar" data-id="${item.id}">Eliminar</button>
+            <button class="action-btn btn-pagado" data-id="${item.id}">Pagado</button>
+          </td>
+        `;
+        
+        tabla.appendChild(row);
+        sumaTotal += item.total;
+      });
+      
+      // Actualizar suma total
+      document.getElementById('suma-total').textContent = sumaTotal.toFixed(2);
+      
+      // Agregar eventos a los botones de acción
+      document.querySelectorAll('.btn-eliminar').forEach(function(button) {
+        button.addEventListener('click', function() {
+          eliminarRegistro(this.getAttribute('data-id'));
+        });
+      });
+      
+      document.querySelectorAll('.btn-editar').forEach(function(button) {
+        button.addEventListener('click', function() {
+          editarRegistro(this.getAttribute('data-id'));
+        });
+      });
+      
+      document.querySelectorAll('.btn-pagado').forEach(function(button) {
+        button.addEventListener('click', function() {
+          marcarComoPagado(this.getAttribute('data-id'));
+        });
+      });
+    }
+    
+    // Función para cargar datos en la tabla de historial
+    function cargarHistorial() {
+      const tabla = document.getElementById('historial-body');
+      const busqueda = document.getElementById('buscar-historial').value.toLowerCase();
+      const historial = memoryStorage.getHistorial();
+      
+      // Filtrar por búsqueda si hay texto
+      const historialFiltrado = historial.filter(function(item) {
+        if (busqueda === '') return true;
+        
+        return (
+          item.nombre.toLowerCase().includes(busqueda) ||
+          item.descripcion.toLowerCase().includes(busqueda) ||
+          item.fecha.includes(busqueda) ||
+          item.fechaPago.includes(busqueda)
+        );
+      });
+      
+      // Limpiar tabla
+      tabla.innerHTML = '';
+      
+      // Calcular total
+      let sumaTotal = 0;
+      
+      // Agregar datos a la tabla
+      historialFiltrado.forEach(function(item) {
+        const row = document.createElement('tr');
+        
+        // Formatear fechas para mostrar en formato local
+        let fechaPagoFormateada, fechaRegistroFormateada;
+        try {
+          fechaPagoFormateada = new Date(item.fechaPago + 'T00:00:00').toLocaleDateString();
+          fechaRegistroFormateada = new Date(item.fecha + 'T00:00:00').toLocaleDateString();
+        } catch (e) {
+          fechaPagoFormateada = item.fechaPago;
+          fechaRegistroFormateada = item.fecha;
+        }
+        
+        row.innerHTML = `
+          <td>${fechaPagoFormateada}</td>
+          <td>${fechaRegistroFormateada}</td>
+          <td>${item.nombre}</td>
+          <td>${item.descripcion}</td>
+          <td>${item.total.toFixed(2)}</td>
+        `;
+        
+        tabla.appendChild(row);
+        sumaTotal += item.total;
+      });
+      
+      // Actualizar suma total del historial
+      document.getElementById('suma-total-historial').textContent = sumaTotal.toFixed(2);
+    }
+    
+    // Función para eliminar un registro
+    function eliminarRegistro(id) {
+      if (confirm('¿Está seguro que desea eliminar este registro?')) {
+        let pendientes = memoryStorage.getPendientes();
+        pendientes = pendientes.filter(item => item.id != id);
+        memoryStorage.setPendientes(pendientes);
+        cargarDatos();
+      }
+    }
+    
+    // Función para marcar un registro como pagado
+    function marcarComoPagado(id) {
+      if (confirm('¿Está seguro que desea marcar este registro como pagado? Se moverá al historial.')) {
+        let pendientes = memoryStorage.getPendientes();
+        const index = pendientes.findIndex(item => item.id == id);
+        
+        if (index !== -1) {
+          // Agregar al historial
+          memoryStorage.addToHistorial(pendientes[index]);
+          
+          // Eliminar de pendientes
+          pendientes.splice(index, 1);
+          memoryStorage.setPendientes(pendientes);
+          
+          // Actualizar tablas
+          cargarDatos();
+          cargarHistorial();
+          
+          alert('El registro ha sido marcado como pagado y movido al historial.');
+        }
+      }
+    }
+    
+    // Función para editar un registro
+    function editarRegistro(id) {
+      const pendientes = memoryStorage.getPendientes();
+      const registro = pendientes.find(item => item.id == id);
+      
+      if (registro) {
+        document.getElementById('fecha').value = registro.fecha;
+        document.getElementById('nombre').value = registro.nombre;
+        document.getElementById('descripcion').value = registro.descripcion;
+        document.getElementById('total').value = registro.total;
+        
+        // Activar modo edición
+        modoEdicion = true;
+        idEdicion = id;
+        btnAgregar.textContent = 'Actualizar';
+      }
+    }
+    
+    // Datos de ejemplo para mostrar inicialmente (dos ítems en pendientes y uno en historial)
+    function cargarDatosEjemplo() {
+      const hoy = new Date().toISOString().split('T')[0];
+      const ayer = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      const anteayer = new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0];
+      
+      const datosPendientesEjemplo = [
+        {
+          id: 1,
+          fecha: hoy,
+          nombre: "Ejemplo Cliente 1",
+          descripcion: "Servicio de consultoría",
+          total: 1500.00
+        },
+        {
+          id: 2,
+          fecha: ayer,
+          nombre: "Ejemplo Cliente 2",
+          descripcion: "Pago parcial proyecto web",
+          total: 2000.00
+        }
+      ];
+      
+      const datosHistorialEjemplo = [
+        {
+          id: 3,
+          fecha: anteayer,
+          fechaPago: ayer,
+          nombre: "Ejemplo Cliente 3",
+          descripcion: "Diseño de logo",
+          total: 500.00
+        }
+      ];
+      
+      memoryStorage.setPendientes(datosPendientesEjemplo);
+      memoryStorage.setHistorial(datosHistorialEjemplo);
+    }
+    
+    // Cargar datos de ejemplo (se deja activo para mostrar los ítems por defecto)
+    cargarDatosEjemplo();
+    
+    // Función para capturar la tabla y mostrar la previsualización sin la columna de ACCIONES
+    function capturarTabla(callback) {
+      // Seleccionar todos los elementos de la columna de acciones
+      const elementosAcciones = document.querySelectorAll('.acciones-col');
+      // Ocultarlos temporalmente
+      elementosAcciones.forEach(el => el.style.display = "none");
+      
+      const tabla = document.getElementById('tabla-pendientes');
+      html2canvas(tabla).then(canvas => {
+        // Restaurar la visualización de la columna
+        elementosAcciones.forEach(el => el.style.display = "");
+        
+        const imagenBase64 = canvas.toDataURL("image/png");
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+        previewImage.src = imagenBase64;
+        previewContainer.style.display = "block";
+        if (callback) callback(imagenBase64);
+      });
+    }
+    
+    // Evento para previsualizar la imagen
+    document.getElementById('previsualizar-imagen').addEventListener('click', function () {
+      capturarTabla();
+    });
+    
+    // Evento para copiar la imagen previsualizada al portapapeles
+    document.getElementById('copiar-imagen').addEventListener('click', function () {
+      const previewImage = document.getElementById('preview-image');
+      // Convertir el data URL en un Blob y copiarlo
+      fetch(previewImage.src)
+        .then(response => response.blob())
+        .then(blob => {
+          const item = new ClipboardItem({ "image/png": blob });
+          navigator.clipboard.write([item]).then(() => {
+            alert("Imagen copiada al portapapeles");
+          }).catch(err => {
+            alert("Error al copiar la imagen: " + err);
+          });
+        });
+    });
+  </script>
+</body>
+</html>
