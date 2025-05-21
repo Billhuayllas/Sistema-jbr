@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h2>Cash and Banks</h2>
+
+  {# Flash messages handled by layout.html #}
+
+  <h3>Add New Transaction</h3>
+  <form method="POST" action="{{ url_for('cash_and_banks_bp.index') }}">
+    <div>
+      <label for="date">Date:</label>
+      <input type="date" id="date" name="date" required>
+    </div>
+    <div>
+      <label for="concept">Concept:</label>
+      <input type="text" id="concept" name="concept" required>
+    </div>
+    <div>
+      <label for="amount">Amount:</label>
+      <input type="number" step="0.01" id="amount" name="amount" required>
+    </div>
+    <div>
+      <label for="type">Type:</label>
+      <select id="type" name="type" required>
+        <option value="cash">Cash</option>
+        <option value="bank_account">Bank Account</option>
+      </select>
+    </div>
+    <button type="submit">Add Transaction</button>
+  </form>
+
+  <hr>
+
+  <h3>All Transactions</h3>
+  {% if transactions %}
+  <div class="table-responsive-wrapper"> {# For responsive behavior #}
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Concept</th>
+          <th>Amount</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for transaction in transactions %}
+        <tr>
+          <td>{{ transaction.date }}</td>
+          <td>{{ transaction.concept }}</td>
+          <td>{{ "%.2f"|format(transaction.amount|float) }}</td>
+          <td>{{ transaction.type }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>No transactions yet.</p>
+  {% endif %}
+
+  <hr>
+  <div class="data-section">
+    <h3>Totals</h3>
+    <p>Total Cash: <strong>{{ "%.2f"|format(totals.total_cash|float) }}</strong></p>
+    <p>Total Bank Account: <strong>{{ "%.2f"|format(totals.total_bank|float) }}</strong></p>
+    <p><strong>Grand Total: {{ "%.2f"|format(totals.grand_total|float) }}</strong></p>
+  </div>
+
+  <hr>
+  <div class="action-links">
+    <a href="{{ url_for('cash_and_banks_bp.daily_report') }}" class="button-link">View Daily Report</a>
+    <a href="{{ url_for('cash_and_banks_bp.corte_de_caja') }}" class="button-link">View Corte de Caja</a>
+  </div>
+{% endblock %}

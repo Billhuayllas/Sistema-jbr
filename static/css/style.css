@@ -1,0 +1,397 @@
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background-color: #f4f7f6; /* Light grayish background */
+    color: #333;
+    padding-top: 70px; /* Space for fixed navbar */
+}
+
+a {
+    color: #007bff; /* Standard blue link color */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Navigation Bar */
+nav {
+    background-color: #343a40; /* Dark background for navbar */
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: flex-start; /* Align items to the start */
+    align-items: center;
+}
+
+nav ul li {
+    margin-right: 20px;
+}
+
+nav ul li a {
+    color: #f8f9fa; /* Light color for nav links */
+    padding: 0.5rem 0.75rem;
+    display: block;
+    border-radius: 4px;
+}
+
+nav ul li a:hover,
+nav ul li a.active { /* Basic active styling, can be enhanced */
+    background-color: #495057; /* Slightly lighter dark for hover/active */
+    text-decoration: none;
+}
+
+/* Main Content Container */
+.container {
+    width: 90%;
+    max-width: 1200px; /* Max width for content */
+    margin: 2rem auto; /* Top/bottom margin and auto for left/right centering */
+    padding: 1.5rem;
+    background-color: #fff; /* White background for content area */
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    color: #343a40; /* Darker color for headings */
+    margin-bottom: 0.75rem;
+}
+
+h1 { font-size: 2.2rem; }
+h2 { font-size: 1.8rem; }
+h3 { font-size: 1.5rem; }
+
+/* Forms */
+form {
+    margin-bottom: 1.5rem;
+}
+
+form div {
+    margin-bottom: 1rem;
+}
+
+form label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: bold;
+    color: #495057; /* Slightly lighter than headings */
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="date"],
+form input[type="file"],
+form select,
+form textarea {
+    width: 100%;
+    padding: 0.65rem;
+    border: 1px solid #ced4da; /* Light gray border */
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+form input[type="file"] {
+    padding: 0.3rem; /* Specific padding for file input */
+}
+
+form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Buttons */
+button, .button-link { /* .button-link for a tags styled as buttons */
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #fff;
+    background-color: #007bff; /* Primary blue */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s ease-in-out;
+    margin-right: 0.5rem; /* Spacing between buttons */
+}
+
+button:hover, .button-link:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    text-decoration: none;
+    color: #fff;
+}
+
+/* Specific button types */
+button.delete-button, .button-link.delete-button {
+    background-color: #dc3545; /* Red for delete */
+}
+button.delete-button:hover, .button-link.delete-button:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
+button.edit-button, .button-link.edit-button {
+    background-color: #ffc107; /* Yellow for edit */
+    color: #212529;
+}
+button.edit-button:hover, .button-link.edit-button:hover {
+    background-color: #e0a800;
+}
+
+button.cancel-button, .button-link.cancel-button {
+    background-color: #6c757d; /* Gray for cancel/secondary actions */
+}
+button.cancel-button:hover, .button-link.cancel-button:hover {
+    background-color: #5a6268;
+}
+
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+table th, table td {
+    padding: 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6; /* Light gray border for rows */
+}
+
+table th {
+    background-color: #e9ecef; /* Light gray background for headers */
+    font-weight: 600;
+    color: #495057;
+}
+
+table tbody tr:nth-child(odd) {
+    background-color: #f8f9fa; /* Zebra striping for odd rows */
+}
+
+table tbody tr:hover {
+    background-color: #e9ecef; /* Highlight on hover */
+}
+
+table img { /* For images within tables, like product catalog list */
+    max-width: 60px;
+    height: auto;
+    border-radius: 4px;
+}
+
+/* Flash Messages */
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.flashes li {
+    padding: 0.8rem 1.2rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+.flashes li.success {
+    background-color: #d4edda; /* Green for success */
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.flashes li.error {
+    background-color: #f8d7da; /* Red for error */
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.flashes li.info {
+    background-color: #d1ecf1; /* Blue for info */
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+
+/* Product Grid Specific Styles */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); /* Slightly smaller cards */
+  gap: 1.5rem; /* Increased gap */
+}
+
+.product-card {
+  background-color: #fff;
+  border: 1px solid #e0e0e0; /* Lighter border */
+  border-radius: 8px; /* More rounded corners */
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.07); /* Softer shadow */
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.product-card:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.product-card img {
+  max-width: 100%;
+  height: 160px; /* Slightly taller image area */
+  object-fit: contain;
+  margin-bottom: 0.75rem;
+  border-radius: 4px; /* Rounded corners for image */
+}
+
+.product-card h4 {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.product-card p {
+  font-size: 0.9rem;
+  color: #555; /* Slightly lighter text for details */
+  margin-bottom: 0.25rem;
+}
+
+.product-card .actions { /* Container for buttons if needed */
+    margin-top: 0.75rem;
+}
+
+/* Helper class for inline forms (like delete buttons in tables) */
+form.inline-form {
+    display: inline;
+    margin-bottom: 0; /* Override default form margin */
+}
+form.inline-form button {
+    padding: 0.3rem 0.6rem; /* Smaller buttons for inline actions */
+    font-size: 0.85rem;
+    margin-left: 0.3rem;
+}
+
+/* Utility classes */
+.text-center {
+    text-align: center;
+}
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+
+/* Ensure specific form buttons in product form have spacing */
+#image + button { /* if the add/update button is directly after image info */
+    margin-top: 1rem;
+}
+
+/* Adjustments for specific templates if needed */
+/* Example: Ensure filter form in product list/grid is compact */
+.filter-form select, .filter-form button {
+    display: inline-block;
+    width: auto; /* Override full width for select */
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+.filter-form {
+    margin-bottom: 1rem; /* Ensure space below filter */
+}
+
+/* Links inside headings (e.g., for add new product) */
+h2 a, h3 a {
+    font-size: 0.8em; /* Smaller font for links in headings */
+    margin-left: 10px;
+    font-weight: normal; /* Normal weight for such links */
+}
+
+/* Style for current image preview in product form */
+.current-product-image {
+    max-width: 120px;
+    height: auto;
+    margin-top: 8px;
+    border: 1px solid #ddd;
+    padding: 3px;
+    border-radius: 4px;
+}
+
+/* Responsive table for smaller screens */
+@media screen and (max-width: 768px) {
+    /* This is a very basic approach. For complex tables, more advanced techniques are needed. */
+    /* Force table to not be like tables anymore */
+    /*
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    tr { border: 1px solid #ccc; margin-bottom: 0.5rem;}
+
+    td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+    }
+
+    td:before {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        content: attr(data-label); /* Requires data-label attributes on td elements */
+    /* }
+    */
+    /* A simpler approach for now: allow horizontal scrolling */
+    .table-responsive-wrapper {
+        overflow-x: auto;
+        margin-bottom: 1rem; /* Add some space below the scrollable table */
+    }
+    nav ul {
+        flex-direction: column; /* Stack nav items on small screens */
+        align-items: flex-start;
+    }
+    nav ul li {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+        width: 100%;
+    }
+    nav ul li a {
+        display: block; /* Make links take full width of li */
+        width: 100%;
+    }
+    body {
+        padding-top: 0; /* Adjust if navbar height changes significantly or becomes static */
+    }
+    nav {
+        position: static; /* Navbar not fixed on small screens to avoid content overlap issues with stacked items */
+    }
+    .container {
+        margin-top: 1rem; /* Adjust if navbar becomes static */
+    }
+}

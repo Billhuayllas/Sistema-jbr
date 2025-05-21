@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h2>Corte de Caja</h2>
+
+  {# Flash messages are handled by layout.html now #}
+
+  <div class="data-section">
+    <h3>Overall Totals</h3>
+    <p>Total Cash on Hand: <strong>{{ "%.2f"|format(overall_totals.total_cash|float) }}</strong></p>
+    <p>Total in Bank Accounts: <strong>{{ "%.2f"|format(overall_totals.total_bank|float) }}</strong></p>
+    <p><strong>Overall Grand Total: {{ "%.2f"|format(overall_totals.grand_total|float) }}</strong></p>
+  </div>
+
+  <hr>
+
+  <div class="data-section">
+    <h3>Totals for Today ({{ today_date_str }})</h3>
+    {% if daily_totals %}
+      <p>Today's Cash Transactions Total: <strong>{{ "%.2f"|format(daily_totals.today_cash|float) }}</strong></p>
+      <p>Today's Bank Transactions Total: <strong>{{ "%.2f"|format(daily_totals.today_bank|float) }}</strong></p>
+      <p><strong>Today's Grand Total: {{ "%.2f"|format(daily_totals.today_grand_total|float) }}</strong></p>
+    {% else %}
+      <p>No transactions recorded for today.</p>
+    {% endif %}
+  </div>
+
+  <hr>
+  <p><a href="{{ url_for('cash_and_banks_bp.index') }}" class="button-link cancel-button">Back to Overview</a></p>
+{% endblock %}

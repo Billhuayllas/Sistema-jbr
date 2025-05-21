@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h2>Daily Cash and Bank Report</h2>
+
+  {# Flash messages handled by layout.html #}
+
+  <form method="GET" action="{{ url_for('cash_and_banks_bp.daily_report') }}" class="filter-form">
+    <div>
+      <label for="date">Select Date:</label>
+      <input type="date" id="date" name="date" value="{{ selected_date if selected_date else '' }}" required>
+      <button type="submit">View Report</button> {# Default button style applies #}
+    </div>
+  </form>
+
+  <hr>
+
+  {% if selected_date %}
+    <h3>Transactions for {{ selected_date }}</h3>
+    {% if transactions %}
+    <div class="table-responsive-wrapper"> {# For responsive behavior #}
+      <table>
+        <thead>
+          <tr>
+            <th>Concept</th>
+            <th>Amount</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for transaction in transactions %}
+          <tr>
+            <td>{{ transaction.concept }}</td>
+            <td>{{ "%.2f"|format(transaction.amount|float) }}</td>
+            <td>{{ transaction.type }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p>No transactions found for this date.</p>
+    {% endif %}
+  {% else %}
+    <p>Please select a date to view the report.</p>
+  {% endif %}
+
+  <hr>
+  <p><a href="{{ url_for('cash_and_banks_bp.index') }}" class="button-link cancel-button">Back to Overview</a></p>
+{% endblock %}

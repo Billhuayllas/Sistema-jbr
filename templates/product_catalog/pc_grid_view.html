@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <style>
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .product-card {
+      border: 1px solid #ccc;
+      padding: 15px;
+      text-align: center;
+    }
+    .product-card img {
+      max-width: 100%;
+      height: 150px; /* Fixed height for uniformity */
+      object-fit: contain; /* Or 'cover' depending on desired effect */
+      margin-bottom: 10px;
+    }
+    .product-card h4 {
+      margin-bottom: 5px;
+    }
+    .product-card p {
+      font-size: 0.9em;
+      margin-bottom: 3px;
+    }
+  </style>
+
+  <h2>Product Catalog - Grid View</h2>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class="flashes">
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <div>
+    <a href="{{ url_for('product_catalog_bp.add_product_route') }}">Add New Product</a> |
+    <a href="{{ url_for('product_catalog_bp.list_products', series=current_series) }}">List View</a>
+  <div class="action-bar">
+    <a href="{{ url_for('product_catalog_bp.add_product_route') }}" class="button-link">Add New Product</a>
+    <a href="{{ url_for('product_catalog_bp.list_products', series=current_series) }}" class="button-link cancel-button">List View</a>
+  </div>
+
+  <hr>
+  <h3>Filter by Series</h3>
+  <form method="GET" action="{{ url_for('product_catalog_bp.grid_products') }}" class="filter-form">
+      <select name="series" onchange="this.form.submit()">
+          <option value="">All Series</option>
+          {% for series_item in product_series_list %}
+              <option value="{{ series_item }}" {% if series_item == current_series %}selected{% endif %}>{{ series_item|capitalize }}</option>
+          {% endfor %}
+      </select>
+      <noscript><button type="submit">Filter</button></noscript>
+  </form>
+  <hr>
+
+  {% if products %}
+  <div class="product-grid">
+    {% for product in products %}
+    <div class="product-card">
+      {% if product.image_filename %}
+        <img src="{{ url_for('static', filename='uploads/products/' + product.image_filename) }}" alt="{{ product.name }}">
+      {% else %}
+        <img src="{{ url_for('static', filename='images/placeholder.png') }}" alt="No Image Available"> {# Assuming a placeholder image exists #}
+      {% endif %}
+      <h4>{{ product.name }}</h4>
+      <p><strong>Code:</strong> {{ product.product_code }}</p>
+      <p><strong>Series:</strong> {{ product.series|capitalize }}</p>
+      <p><strong>Unit Price:</strong> {{ "%.2f"|format(product.price_unit|float) if product.price_unit is not none else 'N/A' }}</p>
+      <p class="actions">
+        <a href="{{ url_for('product_catalog_bp.edit_product_route', product_id=product.id) }}" class="button-link edit-button">Edit</a>
+        <form method="POST" action="{{ url_for('product_catalog_bp.delete_product_route', product_id=product.id) }}" class="inline-form">
+          <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this product?');">Delete</button>
+        </form>
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p>No products found{% if current_series %} for series "{{ current_series|capitalize }}"{% endif %}. <a href="{{ url_for('product_catalog_bp.add_product_route') }}" class="button-link">Add one?</a></p>
+  {% endif %}
+{% endblock %}
