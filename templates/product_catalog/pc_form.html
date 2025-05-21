@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h2>{% if product.id %}Edit Product{% else %}Add New Product{% endif %}</h2>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class="flashes">
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST" action="{{ form_action_url }}" enctype="multipart/form-data">
+    <div>
+      <label for="product_code">Product Code:</label>
+      <input type="text" id="product_code" name="product_code" value="{{ product.product_code if product else '' }}" required>
+    </div>
+    <div>
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" value="{{ product.name if product else '' }}" required>
+    </div>
+    <div>
+      <label for="series">Series:</label>
+      <select id="series" name="series" required>
+        <option value="">Select a Series</option>
+        {% for series_item in product_series_list %}
+          <option value="{{ series_item }}" {% if product and product.series == series_item %}selected{% endif %}>
+            {{ series_item|capitalize }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="price_fox">Price (FOX):</label>
+      <input type="number" step="0.01" id="price_fox" name="price_fox" value="{{ product.price_fox if product and product.price_fox is not none }}">
+    </div>
+    <div>
+      <label for="cost">Cost:</label>
+      <input type="number" step="0.01" id="cost" name="cost" value="{{ product.cost if product and product.cost is not none }}">
+    </div>
+    <div>
+      <label for="price_wholesale">Price (Wholesale):</label>
+      <input type="number" step="0.01" id="price_wholesale" name="price_wholesale" value="{{ product.price_wholesale if product and product.price_wholesale is not none }}">
+    </div>
+    <div>
+      <label for="price_unit">Price (Unit):</label>
+      <input type="number" step="0.01" id="price_unit" name="price_unit" value="{{ product.price_unit if product and product.price_unit is not none }}">
+    </div>
+    <div>
+      <label for="image">Product Image:</label>
+      <input type="file" id="image" name="image" accept="image/*">
+      {% if product and product.image_filename %}
+        <p>Current image: {{ product.image_filename }}</p>
+        <img src="{{ url_for('static', filename='uploads/products/' + product.image_filename) }}" alt="{{ product.name }}" class="current-product-image">
+      {% endif %}
+    </div>
+    
+    <button type="submit">{% if product.id %}Update Product{% else %}Add Product{% endif %}</button> {# Default button style #}
+    <a href="{{ url_for('product_catalog_bp.list_products') }}" class="button-link cancel-button">Cancel</a>
+  </form>
+{% endblock %}

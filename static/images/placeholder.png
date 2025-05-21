@@ -1,0 +1,7 @@
+Placeholder for product images.
+This is a text file, but in a real scenario it would be a small, generic image.
+You can replace this with an actual PNG image file.
+For the purpose of this exercise, the text content signifies a placeholder.
+The application will attempt to load this as an image.
+If an actual image is needed for testing, it should be manually created or downloaded.
+e.g. A 150x150 grey square.
