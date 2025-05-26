@@ -1,0 +1,146 @@
+{% extends "layout.html" %}
+
+{% block title %}Tabla de Precios - Sistema ERP{% endblock %}
+
+{% block extra_head %}
+    {# Styles have been moved to static/css/style.css #}
+{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Tabla de Precios</h1>
+</div>
+
+<input type="text" id="priceTableSearchInput" placeholder="Buscar en la tabla..." value="{{ search_query if search_query else '' }}">
+
+<div class="table-responsive-wrapper"> {# For responsive behavior #}
+    <table class="data-table" id="priceTable">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Marca</th>
+                <th>Serie</th>
+                <th>Medida</th> {# Assuming 'Medida' is a field in product data, e.g., product.measurement #}
+                <th>Precio Vta.</th>
+                <th>Precio Mayor.</th>
+                <th>Costo</th>
+                <th>Costo FOB</th> {# Assuming 'Costo FOB' is a field, e.g., product.cost_fob #}
+                <th>Stock</th>   {# Assuming 'Stock' is a field, e.g., product.stock #}
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if products %}
+                {% for product in products %}
+                <tr data-id="{{ product.id }}">
+                    <td>{{ product.product_code }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>
+                        {% set brand = brands_map.get(product.brand_code) %} {# Assuming product has brand_code #}
+                        {{ brand.name if brand else (product.brand_code if product.brand_code else 'N/A') }}
+                    </td>
+                    <td>
+                        {% set series = series_map.get(product.series) %} {# product.series is the series code/key #}
+                        {{ series.name if series else (product.series if product.series else 'N/A') }}
+                    </td>
+                    <td>{{ product.measurement | default('N/A') }}</td> {# Example: product.measurement #}
+                    <td>${{ "%.2f"|format(product.price_unit|float) if product.price_unit is not none else 'N/A' }}</td>
+                    <td>${{ "%.2f"|format(product.price_wholesale|float) if product.price_wholesale is not none else 'N/A' }}</td>
+                    <td>${{ "%.2f"|format(product.cost|float) if product.cost is not none else 'N/A' }}</td>
+                    <td>${{ "%.2f"|format(product.cost_fob|float) if product.cost_fob is not none else 'N/A' }}</td> {# Example: product.cost_fob #}
+                    <td>{{ product.stock | default('N/A') }}</td> {# Example: product.stock #}
+                    <td class="table-actions">
+                        <a href="{{ url_for('product_catalog_bp.edit_product_route', product_id=product.id) }}" class="btn btn-sm btn-warning edit-product"><i class="fas fa-edit"></i> Editar</a>
+                        <form method="POST" action="{{ url_for('product_catalog_bp.delete_product_route', product_id=product.id) }}" class="inline-form delete-product-form">
+                            <button type="submit" class="btn btn-sm btn-danger delete-product" onclick="return confirm('¿Está seguro de que desea eliminar este producto?');"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr class="empty-row">
+                    <td colspan="11">No hay productos para mostrar.</td> {# Colspan should match number of columns #}
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('priceTableSearchInput');
+    const table = document.getElementById('priceTable');
+    const tableBody = table.getElementsByTagName('tbody')[0];
+    const rows = Array.from(tableBody.getElementsByTagName('tr'));
+    const emptyRow = tableBody.querySelector('.empty-row');
+
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        let visibleRows = 0;
+
+        rows.forEach(function(row) {
+            if (row.classList.contains('empty-row')) return; // Skip the empty row message
+
+            const cells = row.getElementsByTagName('td');
+            let found = false;
+            for (let i = 0; i < cells.length -1; i++) { // -1 to exclude action cell
+                if (cells[i] && cells[i].textContent.toLowerCase().includes(searchTerm)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                row.style.display = '';
+                visibleRows++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        if (emptyRow) {
+            if (visibleRows === 0 && searchTerm !== "") { // Show empty message if search yields no results
+                 if(rows.length > 1 || (rows.length === 1 && !rows[0].classList.contains('empty-row'))) { // Check if there were actual data rows
+                    emptyRow.style.display = ''; // Make sure it's a table row
+                    emptyRow.cells[0].textContent = 'No productos coinciden con la búsqueda.';
+                 } else { // Table was initially empty (only empty-row was present)
+                    emptyRow.style.display = '';
+                    emptyRow.cells[0].textContent = 'No hay productos para mostrar.';
+                 }
+            } else if (rows.length === 1 && rows[0].classList.contains('empty-row')) { // Table initially empty
+                emptyRow.style.display = '';
+                emptyRow.cells[0].textContent = 'No hay productos para mostrar.';
+            }
+            else {
+                 emptyRow.style.display = 'none';
+            }
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterTable);
+        // Initial filter if search input has value from server-side search
+        if(searchInput.value){
+            // The server already filtered the `products` list.
+            // Client-side search is for further refinement of the *currently displayed* data.
+            // If server-side search is comprehensive, this initial call might not be needed,
+            // or it helps if client wants to refine server results.
+            // For now, we'll assume server provides the primary filtered list.
+        }
+    }
+    
+    // Ensure empty row is correctly handled on initial load if no products
+    if (rows.length === 0 && emptyRow) { // This case is if products list is empty from server
+         emptyRow.style.display = '';
+    } else if (rows.length === 1 && rows[0].classList.contains('empty-row') && emptyRow){
+         emptyRow.style.display = ''; // Empty row is the only row
+    } else if (emptyRow) {
+         emptyRow.style.display = 'none'; // Hide if there are products
+    }
+
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends "layout.html" %}
+
+{% block title %}Catálogo de Productos - Sistema ERP{% endblock %}
+
+{% block extra_head %}
+    {# Styles have been moved to static/css/style.css #}
+{% endblock %}
+
+{% block content %}
+{% include 'product_catalog/_product_modal.html' %} {# Modal included here #}
+<div class="content-header">
+    <h1>Catálogo de Productos</h1>
+</div>
+
+<div class="controls-container">
+    <div class="left-controls">
+        <button class="btn btn-secondary" id="btnImportarProductos"><i class="fas fa-file-import"></i> Importar</button>
+        <button class="btn btn-secondary" id="btnExportarProductos"><i class="fas fa-file-export"></i> Exportar</button>
+        <select id="juegoFilter" class="form-control" style="width: auto;"> {# form-control for some basic styling from global css #}
+            <option value="">Filtrar por Juego (Serie)...</option>
+            {% for series_item in series_list_for_dropdown %}
+                <option value="{{ series_item.code }}" {% if series_item.code == current_series_filter %}selected{% endif %}>
+                    {{ series_item.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="right-controls">
+        <input type="text" id="searchInput" placeholder="Buscar en Catálogo..." value="{{ search_query if search_query else '' }}">
+        <button class="btn btn-primary" id="addProductoBtn"><i class="fas fa-plus"></i> Agregar Producto</button>
+    </div>
+</div>
+
+<div class="product-grid">
+    {% if products %}
+        {% for product in products %}
+            <div class="product-card" 
+                 data-id="{{ product.id }}" 
+                 data-nombre="{{ product.name }}" 
+                 data-codigo="{{ product.product_code }}"
+                 data-marca="{{ product.brand_code | default('N/A') }}" {# Assuming product has brand_code #}
+                 data-serie="{{ product.series | default('N/A') }}" {# product.series is the series code/key #}
+                 data-precio="{{ product.price_unit | default(0.0) | float }}"
+                 data-descripcion="{{ product.description | default('') }}">
+                
+                <img src="{{ url_for('static', filename='uploads/products/' + product.image_filename) if product.image_filename else url_for('static', filename='images/placeholder.png') }}" alt="{{ product.name }}">
+                
+                {% set series_data = series_map.get(product.series) %}
+                {% if series_data %}
+                    <span class="serie-badge" style="background-color: {{ series_data.color }};">{{ series_data.name }}</span>
+                {% elif product.series %}
+                     <span class="serie-badge" style="background-color: #7f8c8d;">{{ product.series }}</span> {# Fallback if series code not in map #}
+                {% endif %}
+
+                <h5 class="product-name">{{ product.name }}</h5>
+                <p class="product-code">Código: {{ product.product_code }}</p>
+                <p class="product-description">{{ product.description | default('Sin descripción.') | truncate(100, True) }}</p>
+                <p class="product-price">
+                    ${{ "%.2f"|format(product.price_unit|float) if product.price_unit is not none else 'N/A' }}
+                </p>
+                <div class="product-actions">
+                    <button class="btn btn-info btn-sm view-product-details" data-id="{{ product.id }}"><i class="fas fa-eye"></i> Ver Ficha</button>
+                    <a href="{{ url_for('product_catalog_bp.edit_product_route', product_id=product.id) }}" class="btn btn-warning btn-sm edit-product"><i class="fas fa-edit"></i> Editar</a>
+                    <form method="POST" action="{{ url_for('product_catalog_bp.delete_product_route', product_id=product.id) }}" class="inline-form delete-product-form">
+                        <button type="submit" class="btn btn-danger btn-sm delete-product" onclick="return confirm('¿Está seguro de que desea eliminar este producto?');"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        {# This will be shown by JS if grid becomes empty after filtering, or by server if products list is initially empty #}
+    {% endif %}
+</div>
+
+<div id="emptyState" class="empty-state" style="display: {% if not products %}block{% else %}none{% endif %};">
+    <i class="fas fa-search-minus"></i>
+    <p>No se encontraron productos que coincidan con su búsqueda o filtro.</p>
+    <p><small>Intente ajustar los términos de búsqueda o cambie el filtro de serie.</small></p>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{% include 'product_catalog/_product_modal.html' %} {# Modal included here #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const productGrid = document.querySelector('.product-grid');
+    const productCards = Array.from(productGrid.querySelectorAll('.product-card'));
+    const emptyState = document.getElementById('emptyState');
+    const juegoFilter = document.getElementById('juegoFilter');
+
+    function filterProducts() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedSerie = juegoFilter.value; // This is the series code
+        let visibleProducts = 0;
+
+        productCards.forEach(function(card) {
+            const nombre = card.dataset.nombre.toLowerCase();
+            const codigo = card.dataset.codigo.toLowerCase();
+            const marca = card.dataset.marca.toLowerCase(); // Assuming brand name is available or code is fine
+            const serie = card.dataset.serie; // This is the series code on the product
+            // const descripcion = card.dataset.descripcion.toLowerCase(); // Uncomment if needed
+
+            const matchesSearch = nombre.includes(searchTerm) || 
+                                  codigo.includes(searchTerm) || 
+                                  marca.includes(searchTerm);
+            
+            const matchesSerie = selectedSerie === "" || serie === selectedSerie;
+
+            if (matchesSearch && matchesSerie) {
+                card.style.display = '';
+                visibleProducts++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        if (visibleProducts === 0) {
+            emptyState.style.display = 'block';
+            productGrid.style.display = 'none'; // Hide grid if empty state shown
+        } else {
+            emptyState.style.display = 'none';
+            productGrid.style.display = ''; // Ensure grid is visible
+        }
+    }
+
+    searchInput.addEventListener('input', filterProducts);
+    juegoFilter.addEventListener('change', function() {
+        // This client-side filter will work. 
+        // For server-side filtering on change, we'd submit the form or use AJAX.
+        // The current route structure supports server-side filtering if the page reloads with query params.
+        // To make this dropdown trigger a server-side filter:
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('series', this.value);
+        // Optionally clear search if series changes, or keep it
+        // currentUrl.searchParams.delete('search'); 
+        window.location.href = currentUrl.toString();
+        // For purely client-side filtering with this dropdown (without page reload):
+        // filterProducts(); 
+    });
+    
+    // Initial filter call in case of pre-filled search/filter from server
+    // (though server already filters, this ensures JS state is consistent if we move to more client-side logic)
+    // filterProducts(); // Not strictly needed if server handles initial filter perfectly.
+
+    // "Agregar Producto" button - placeholder for modal trigger
+    const addProductoBtn = document.getElementById('addProductoBtn');
+    if(addProductoBtn) {
+        addProductoBtn.addEventListener('click', function() {
+            // In a later step, this will open productModal
+            // For now, it might link to the add product page if that's preferred fallback
+             window.location.href = "{{ url_for('product_catalog_bp.add_product_route') }}";
+            // alert('Funcionalidad "Agregar Producto" (abrir modal) se implementará en el siguiente paso.');
+        });
+    }
+
+    // "Ver Ficha" buttons - placeholder for modal trigger
+    document.querySelectorAll('.view-product-details').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.id;
+            // In a later step, this will open productDetailModal with product data
+            alert('Funcionalidad "Ver Ficha" (abrir modal) se implementará. ID Producto: ' + productId);
+        });
+    });
+    
+    // Import/Export buttons - placeholder
+    document.getElementById('btnImportarProductos')?.addEventListener('click', () => alert('Funcionalidad "Importar Productos" no implementada.'));
+    document.getElementById('btnExportarProductos')?.addEventListener('click', () => alert('Funcionalidad "Exportar Productos" no implementada.'));
+
+});
+</script>
+{% endblock %}

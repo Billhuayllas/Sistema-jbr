@@ -1,0 +1,90 @@
+{% extends "layout.html" %}
+
+{% block title %}Juegos de Productos - Sistema ERP{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Specific styles for juegos list view, can be moved to main CSS */
+    .juegos-table-actions .btn {
+        margin-right: 5px;
+    }
+    /* Add other specific styles if needed */
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Juegos de Productos</h1>
+    <button class="btn btn-primary" id="btnAgregarJuego"><i class="fas fa-plus"></i> Agregar Juego</button>
+</div>
+
+<div class="table-responsive-wrapper">
+    <table class="data-table" id="juegosTable">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th># Aplicaciones</th>
+                <th># Componentes</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if juegos %}
+                {% for juego in juegos %}
+                <tr data-id="{{ juego.id }}">
+                    <td>{{ juego.codigo }}</td>
+                    <td>{{ juego.nombre }}</td>
+                    <td>{{ juego.aplicaciones | length if juego.aplicaciones else 0 }}</td>
+                    <td>{{ juego.componentes | length if juego.componentes else 0 }}</td>
+                    <td class="juegos-table-actions">
+                        <button class="btn btn-sm btn-warning btnEditarJuego" data-id="{{ juego.id }}"><i class="fas fa-edit"></i> Editar</button>
+                        <button class="btn btn-sm btn-info btnClonarJuego" data-id="{{ juego.id }}"><i class="fas fa-clone"></i> Clonar</button>
+                        <button class="btn btn-sm btn-danger btnEliminarJuego" data-id="{{ juego.id }}"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr class="empty-row">
+                    <td colspan="5">No hay juegos de productos definidos.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{# Include the modal for adding/editing juegos #}
+{% include 'product_catalog/_juego_modal.html' %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Pass the product data to the JavaScript file
+    // Ensure this is properly escaped if product names/codes can contain quotes or special characters.
+    // Using Flask's `tojson` filter is the safest way.
+    const all_products_for_select_json = {{ all_products_for_select | tojson | safe }};
+</script>
+<script src="{{ url_for('static', filename='js/juegos_modal.js') }}"></script>
+<script>
+// Placeholder for any other specific JS for this page (if needed)
+// The main logic for modal and CRUD operations is now in juegos_modal.js
+document.addEventListener('DOMContentLoaded', function() {
+    // Event listeners for delete/clone can be added here if not handled by a global script for modals
+    // Example for delete (actual implementation will be in juegos_modal.js or similar)
+    document.querySelectorAll('.btnEliminarJuego').forEach(button => {
+        button.addEventListener('click', function() {
+            const juegoId = this.dataset.id;
+            // Logic for delete will be in the main JS file for juegos
+            console.log('Attempting to delete juego ID:', juegoId); 
+        });
+    });
+     document.querySelectorAll('.btnClonarJuego').forEach(button => {
+        button.addEventListener('click', function() {
+            const juegoId = this.dataset.id;
+            console.log('Attempting to clone juego ID:', juegoId);
+        });
+    });
+});
+</script>
+{% endblock %}

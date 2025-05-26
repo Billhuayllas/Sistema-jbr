@@ -1,0 +1,25 @@
+{# Modal for Category Configuration #}
+<div class="modal fade" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="categoryForm" method="POST">
+                <input type="hidden" id="categoryId" name="categoryId">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="categoryModalLabel">Agregar Categoría</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="categoryNombre" class="form-label">Nombre (*)</label>
+                        <input type="text" class="form-control form-control-sm" id="categoryNombre" name="nombre" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span class="me-auto text-muted"><small>(*) Campos obligatorios</small></span>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-sm" id="btnGuardarCategoria">Guardar Categoría</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

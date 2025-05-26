@@ -1,0 +1,127 @@
+{# Modal Structure for Juegos de Productos #}
+<div class="modal fade" id="juegoModal" tabindex="-1" role="dialog" aria-labelledby="juegoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document"> {# modal-xl for a very wide modal #}
+        <div class="modal-content">
+            <form id="juegoForm" method="POST"> {# No enctype needed if not uploading files directly in this form #}
+                <input type="hidden" id="juegoId" name="juegoId">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="juegoModalLabel">Agregar Juego de Productos</h5>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-secondary" id="btnNuevoJuegoModal">Nuevo</button>
+                        <button type="submit" class="btn btn-sm btn-primary" id="btnGuardarJuegoModal">Guardar</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    {# Basic Info for Juego #}
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="juegoCodigo" class="form-label">Código Juego (*)</label>
+                            <input type="text" class="form-control form-control-sm" id="juegoCodigo" name="codigo" required>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="juegoNombre" class="form-label">Nombre Juego (*)</label>
+                            <input type="text" class="form-control form-control-sm" id="juegoNombre" name="nombre" required>
+                        </div>
+                    </div>
+                    <hr>
+
+                    {# Aplicaciones de Vehículo Section #}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h6><i class="fas fa-car"></i> Aplicaciones de Vehículo para este Juego</h6>
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" class="form-control" id="juegoAplicacionVehiculo" placeholder="Vehículo (Ej: Hilux)">
+                                <input type="text" class="form-control" id="juegoAplicacionMarcaVehiculo" placeholder="Marca Vehículo (Ej: Toyota)">
+                                <button class="btn btn-outline-success" type="button" id="btnAgregarJuegoAplicacion"><i class="fas fa-plus"></i> Agregar Aplicación</button>
+                            </div>
+                            <ul id="juegoAplicacionesList" class="list-group list-group-flush" style="max-height: 150px; overflow-y: auto;">
+                                {# Aplicaciones for Juego will be added here by JS #}
+                                <li class="list-group-item empty-juego-aplicaciones" style="display:none;">No hay aplicaciones asignadas a este juego.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <hr>
+
+                    {# Productos Incluidos Section #}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h6><i class="fas fa-cogs"></i> Productos Incluidos en este Juego</h6>
+                            <div class="input-group input-group-sm mb-2">
+                                <select class="form-select" id="juegoProductoSelect" data-placeholder="Buscar y seleccionar producto...">
+                                    <option value="">Buscar y seleccionar producto...</option>
+                                    {# Options will be populated by Select2 JS from all_products_for_select passed to parent template #}
+                                </select>
+                                <input type="number" class="form-control" id="juegoProductoCantidad" placeholder="Cant." value="1" min="1" style="max-width: 80px;">
+                                <button class="btn btn-outline-success" type="button" id="btnAgregarJuegoProducto"><i class="fas fa-plus"></i> Añadir Producto</button>
+                            </div>
+                            
+                            <div class="table-responsive-wrapper" style="max-height: 250px; overflow-y: auto;">
+                                <table class="table table-sm table-bordered" id="juegoProductosTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Producto (Código)</th>
+                                            <th>Stock Disp.</th>
+                                            <th>Cantidad</th>
+                                            <th>Costo Unit.</th>
+                                            <th>Costo Total</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="juegoProductosListBody">
+                                        {# Productos for Juego will be added here by JS #}
+                                        <tr class="empty-juego-productos" style="display:none;"><td colspan="6">No hay productos añadidos a este juego.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    
+                    {# Totales Estimados Section #}
+                    <div class="row mt-2">
+                        <div class="col-md-6 offset-md-6">
+                            <h6>Totales Estimados del Juego:</h6>
+                            <dl class="row">
+                                <dt class="col-sm-6">Costo Total Estimado:</dt>
+                                <dd class="col-sm-6 text-end" id="juegoTotalCostoEstimado">$0.00</dd>
+                                
+                                <dt class="col-sm-6">Precio Venta Sugerido:</dt> {# Assuming this might be based on sum of component prices or a markup #}
+                                <dd class="col-sm-6 text-end" id="juegoTotalPrecioVentaSugerido">$0.00</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <span class="me-auto text-muted"><small>(*) Campos obligatorios</small></span>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    {# Guardar button is in header #}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# Template for Juego Aplicacion item (used by JS) #}
+<template id="juegoAplicacionItemTemplate">
+    <li class="list-group-item d-flex justify-content-between align-items-center list-group-item-action py-1 px-2">
+        <div>
+            <strong class="juego-aplicacion-vehiculo"></strong> (<span class="juego-aplicacion-marcavehiculo"></span>)
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-danger remove-juego-aplicacion-btn"><i class="fas fa-times"></i></button>
+    </li>
+</template>
+
+{# Template for Juego Producto item (used by JS for the table) #}
+<template id="juegoProductoItemTemplate">
+    <tr>
+        <td class="juego-producto-nombre">Nombre Producto (Código)</td>
+        <td class="juego-producto-stock">0</td>
+        <td><input type="number" class="form-control form-control-sm juego-producto-cantidad" value="1" min="1" style="width: 70px;"></td>
+        <td class="juego-producto-costo-unitario text-end">0.00</td>
+        <td class="juego-producto-costo-total text-end">0.00</td>
+        <td><button type="button" class="btn btn-sm btn-outline-danger remove-juego-producto-btn"><i class="fas fa-trash-alt"></i></button></td>
+    </tr>
+</template>
+```

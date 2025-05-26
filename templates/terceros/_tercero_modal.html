@@ -1,0 +1,63 @@
+{# Using Bootstrap 5 modal structure as per global layout.html and new JS #}
+<div class="modal fade" id="terceroModal" tabindex="-1" aria-labelledby="terceroModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"> {# modal-lg for wider, style="max-width: 700px;" removed to use BS class #}
+        <div class="modal-content">
+            <form id="terceroForm" novalidate>
+                <input type="hidden" id="terceroId" name="id">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="terceroModalLabel">Agregar Tercero</h5> {# h5 for BS modals #}
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button> {# BS5 close button #}
+                </div>
+                <div class="modal-body">
+                    {# Using Bootstrap's row and col for grid layout instead of custom .form-grid #}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="terceroNombre" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
+                            <input type="text" id="terceroNombre" name="nombre" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="terceroDNI" class="form-label">DNI/RUC</label>
+                            <input type="text" id="terceroDNI" name="dni" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                    <div class="mb-3"> {# For full-width elements #}
+                        <label for="terceroDireccionPrincipal" class="form-label">Dirección Principal</label>
+                        <input type="text" id="terceroDireccionPrincipal" name="direccion_principal" class="form-control form-control-sm">
+                    </div>
+                     <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="terceroTelefono" class="form-label">Teléfono</label>
+                            <input type="text" id="terceroTelefono" name="telefono" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="terceroEmail" class="form-label">Email</label>
+                            <input type="email" id="terceroEmail" name="email" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                    <hr>
+                    <h4 style="font-size: 1.1rem; color: #007bff; margin-bottom: 1rem;">Información de Envío (Encomienda)</h4> {# Using Bootstrap primary color #}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="terceroEnvioDepartamento" class="form-label">Departamento</label>
+                            <input type="text" id="terceroEnvioDepartamento" name="envio_departamento" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="terceroEnvioAgencia" class="form-label">Agencia de Envío</label>
+                            <input type="text" id="terceroEnvioAgencia" name="envio_agencia" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="terceroEnvioNotas" class="form-label">Notas Adicionales (Quién envía, etc.)</label>
+                        <textarea id="terceroEnvioNotas" name="envio_notas" class="form-control form-control-sm" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer"> {# Standard Bootstrap modal footer #}
+                    <small class="text-muted me-auto">Campos con <span class="text-danger">*</span> son obligatorios.</small> {# me-auto for left align #}
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Guardar Tercero</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+```

@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block title %}Configuración de Series - Sistema ERP{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Administración de Series</h1>
+    <button class="btn btn-primary" id="btnAgregarSerie"><i class="fas fa-plus"></i> Agregar Serie</button>
+</div>
+
+<div class="table-responsive-wrapper">
+    <table class="data-table" id="seriesTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Color</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if series_list %}
+                {% for serie in series_list %}
+                <tr data-id="{{ serie.id }}">
+                    <td>{{ serie.id[:8] }}...</td> {# Shortened ID for display #}
+                    <td>{{ serie.codigo }}</td>
+                    <td>{{ serie.nombre }}</td>
+                    <td>
+                        <span style="display:inline-block; width: 20px; height: 20px; background-color: {{ serie.color | default('#7f8c8d') }}; border: 1px solid #ccc; border-radius: 3px; vertical-align: middle;"></span>
+                        {{ serie.color | default('N/A') }}
+                    </td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-warning btnEditarSerie" data-id="{{ serie.id }}"><i class="fas fa-edit"></i> Editar</button>
+                        <button class="btn btn-sm btn-danger btnEliminarSerie" data-id="{{ serie.id }}"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr class="empty-row">
+                    <td colspan="5">No hay series definidas.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% include 'product_catalog/_series_modal.html' %}
+{% endblock %}
+
+{% block extra_js %}
+{# Link to config_modals.js will be added later, or this logic moved there #}
+<script>
+// Placeholder for JS interaction (event listeners for add/edit/delete buttons)
+// This will be handled by static/js/config_modals.js later
+</script>
+{% endblock %}

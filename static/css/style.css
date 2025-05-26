@@ -1,0 +1,850 @@
+/* Global Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif; /* Assuming Roboto, common choice */
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+    background-color: #f0f2f5; /* Light grey background */
+    display: flex; /* For sidebar layout */
+}
+
+a {
+    text-decoration: none;
+    color: #007bff; /* Bootstrap primary blue, common */
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+i.fa-fw { /* FontAwesome fixed width helper */
+    width: 1.28571429em;
+    text-align: center;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 260px;
+    background-color: #2c3e50; /* Dark blue/grey */
+    color: #ecf0f1; /* Light grey/white text */
+    height: 100vh;
+    overflow-y: auto;
+    padding: 0;
+    position: fixed; /* Fixed sidebar */
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 15px 20px;
+    text-align: center;
+    background-color: #1a242f; /* Slightly darker shade for header */
+    border-bottom: 1px solid #3a4a5a;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 1.5em;
+    color: #fff;
+}
+
+ul.menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1; /* Allows menu to take available space */
+}
+
+ul.menu li.menu-item, ul.menu li.menu-item-header {
+    padding: 0;
+}
+
+ul.menu li.menu-item-header {
+    padding: 12px 20px;
+    font-size: 0.9em;
+    color: #8a9bab; /* Lighter color for headers */
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: 10px; /* Space before header */
+}
+
+
+ul.menu li a, ul.menu li span { /* Span for disabled items */
+    display: block;
+    padding: 12px 20px;
+    color: #bdc3c7; /* Lighter text for links */
+    border-left: 3px solid transparent;
+    transition: background-color 0.3s ease, color 0.3s ease, border-left-color 0.3s ease;
+    font-size: 0.95em;
+}
+
+ul.menu li a:hover, ul.menu li a.active {
+    background-color: #34495e; /* Slightly lighter dark blue for hover/active */
+    color: #fff;
+    border-left-color: #3498db; /* Blue accent for active/hover */
+}
+
+ul.menu li a i, ul.menu li span i {
+    margin-right: 10px;
+}
+
+/* Submenu Styles */
+ul.menu li .submenu {
+    list-style: none;
+    padding-left: 0; /* Remove default padding */
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background-color: #23313f; /* Slightly darker for submenu background */
+}
+ul.menu li .submenu.open {
+    /* max-height will be set by JS to fit content */
+}
+
+ul.menu li .submenu a.submenu-item {
+    padding-left: 43px; /* Indent submenu items (after icon + border) */
+    font-size: 0.9em;
+    color: #95a5a6; /* Slightly dimmer for submenu items */
+}
+
+ul.menu li .submenu a.submenu-item:hover, ul.menu li .submenu a.submenu-item.active {
+    color: #ecf0f1;
+    background-color: #2c3e50; /* Match sidebar item hover */
+    border-left-color: #2980b9; /* Slightly different blue for submenu active */
+}
+
+/* Parent item styles for submenu toggle */
+ul.menu li a.parent-item {
+    position: relative; /* For arrow positioning */
+}
+
+ul.menu li a.parent-item::after {
+    content: '\f078'; /* FontAwesome down arrow */
+    font-family: 'Font Awesome 6 Free'; /* Ensure correct FA family */
+    font-weight: 900; /* For solid icons */
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+}
+
+ul.menu li a.parent-item.open::after {
+    transform: translateY(-50%) rotate(-180deg); /* Rotate arrow up */
+}
+
+/* Disabled menu items */
+ul.menu li.disabled span {
+    color: #7f8c8d; /* Greyed out color */
+    cursor: not-allowed;
+    border-left-color: transparent; /* No border for disabled */
+}
+ul.menu li.disabled span:hover {
+    background-color: transparent; /* No hover effect */
+}
+
+
+/* Sidebar Footer */
+.sidebar-footer {
+    padding: 15px 20px;
+    text-align: center;
+    border-top: 1px solid #3a4a5a;
+    background-color: #2c3e50; /* Match sidebar */
+}
+
+.sidebar-footer button {
+    background-color: #e74c3c; /* Red button */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.sidebar-footer button:hover {
+    background-color: #c0392b; /* Darker red */
+}
+
+/* Main Content Styles */
+.main-content {
+    margin-left: 260px; /* Same as sidebar width */
+    padding: 20px;
+    width: calc(100% - 260px); /* Full width minus sidebar */
+    overflow-y: auto; /* If content overflows */
+    height: 100vh; /* Take full viewport height */
+    background-color: #ecf0f1; /* Light background for content area */
+}
+
+/* Content Wrapper (if used inside main-content) */
+.content-wrapper {
+    background-color: #fff; /* White background for actual content box */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+/* Generic section styling within content-wrapper */
+.content-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #fff; /* Default, can be overridden by .form-section */
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+.content-section h4 { /* Headers for these sections */
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #34495e;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+
+/* General Form & Table Styles (can be expanded from previous style.css) */
+h1, h2, h3, h4, h5, h6 {
+    color: #34495e; /* Dark blue-grey for headings */
+    margin-bottom: 1rem;
+}
+
+form {
+    margin-bottom: 1.5rem;
+}
+
+form .mb-3 { 
+    margin-bottom: 1rem !important;
+}
+form .row .mb-3 { 
+     margin-bottom: 1rem !important;
+}
+.form-section { 
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: #fdfdfd;
+}
+.form-section h4 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #34495e;
+}
+
+
+form label, .form-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: bold;
+    color: #495057;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="date"],
+form input[type="file"],
+form select,
+form textarea,
+.form-control, .form-select { 
+    width: 100%;
+    padding: 0.375rem 0.75rem; 
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0.25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+.form-control-sm, .form-select-sm { 
+    min-height: calc(1.5em + 0.5rem + 2px);
+    padding: 0.25rem 0.5rem;
+    font-size: .875rem;
+    border-radius: 0.2rem;
+}
+
+
+button, .button-link, .btn { 
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #fff;
+    background-color: #3498db; 
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s ease-in-out;
+    vertical-align: middle; 
+}
+.btn i { 
+    margin-right: 0.4em;
+}
+.btn-sm { 
+    padding: 0.25rem 0.5rem;
+    font-size: .875rem;
+    border-radius: 0.2rem;
+}
+.btn-sm i {
+    margin-right: 0.3em;
+}
+
+.btn-secondary { background-color: #6c757d; }
+.btn-secondary:hover { background-color: #5a6268; color: #fff;}
+.btn-primary { background-color: #007bff; } 
+.btn-primary:hover { background-color: #0069d9; color: #fff;}
+.btn-info { background-color: #17a2b8; }
+.btn-info:hover { background-color: #138496; color: #fff;}
+.btn-warning { background-color: #ffc107; color: #212529; }
+.btn-warning:hover { background-color: #e0a800; color: #212529;}
+.btn-danger { background-color: #dc3545; }
+.btn-danger:hover { background-color: #c82333; color: #fff;}
+.btn-success { background-color: #28a745; }
+.btn-success:hover { background-color: #218838; color: #fff;}
+.btn-outline-danger { border: 1px solid #dc3545; color: #dc3545; background-color: transparent; }
+.btn-outline-danger:hover { background-color: #dc3545; color: #fff; }
+.btn-outline-success { border: 1px solid #28a745; color: #28a745; background-color: transparent; }
+.btn-outline-success:hover { background-color: #28a745; color: #fff; }
+.btn-outline-secondary { border: 1px solid #6c757d; color: #6c757d; background-color: transparent; }
+.btn-outline-secondary:hover { background-color: #6c757d; color: #fff; }
+.btn-outline-info { border: 1px solid #17a2b8; color: #17a2b8; background-color: transparent; }
+.btn-outline-info:hover { background-color: #17a2b8; color: #fff; }
+
+
+button:hover, .button-link:hover, .btn:hover {
+    text-decoration: none; 
+}
+
+
+table { 
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+table.data-table { 
+}
+table.table-sm th, table.table-sm td { 
+    padding: 0.3rem;
+}
+table.table-bordered { border: 1px solid #dee2e6; }
+table.table-bordered th, table.table-bordered td { border: 1px solid #dee2e6; }
+.table-light, .table-light > th, .table-light > td { background-color: #f8f9fa; } 
+
+
+table th, table td {
+    padding: 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+table th {
+    background-color: #e9ecef;
+    font-weight: 600;
+}
+.text-end { text-align: right !important; }
+.fw-bold { font-weight: bold !important; }
+
+
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0; 
+}
+.flashes li {
+    padding: 0.8rem 1.2rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+.flashes li.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.flashes li.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.flashes li.info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+/* Responsive adjustments (basic) */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative; 
+    }
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    body {
+        flex-direction: column; 
+    }
+    .controls-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .controls-container .left-controls, .controls-container .right-controls {
+        width: 100%;
+        flex-direction: column; 
+        gap: 5px;
+    }
+    .controls-container .left-controls > *, .controls-container .right-controls > * {
+        width: 100%; 
+    }
+    #searchInput, #priceTableSearchInput, .table-search-input { 
+        width: 100% !important; 
+        margin-top: 10px; 
+    }
+    .table-responsive-wrapper { 
+        overflow-x: auto;
+        margin-bottom: 1rem; 
+    }
+    .modal-xl { max-width: 100% !important; margin: 0.5rem !important; } 
+    .modal-dialog { margin: 0.5rem !important; }
+}
+
+/* Select2 Styles */
+.select2-container--default .select2-selection--single {
+    height: calc(1.5em + 0.75rem + 2px); 
+    padding: .375rem .75rem;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 1.5; padding-left: 0;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: calc(1.5em + 0.75rem);
+}
+.select2-container--bootstrap-5 .select2-dropdown {
+    border-color: #ced4da;
+}
+.select2-container--bootstrap-5 .select2-selection {
+    border-color: #ced4da !important;
+    border-radius: .25rem !important;
+    padding: .375rem .75rem !important;
+    min-height: calc(1.5em + 0.75rem + 2px) !important; 
+}
+.select2-container--bootstrap-5.select2-container--focus .select2-selection, 
+.select2-container--bootstrap-5.select2-container--open .select2-selection {
+    border-color: #86b7fe !important; 
+    box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25) !important; 
+}
+#juegoModal .select2-container { width: 100% !important; } 
+
+
+#btnBorrarDatos { 
+    background-color: #c0392b;
+}
+#btnBorrarDatos:hover {
+    background-color: #a93226;
+}
+
+ul.menu li a.top-level-link.active {
+    background-color: #34495e;
+    color: #fff;
+    border-left-color: #3498db;
+}
+
+ul.menu li a i, ul.menu li span i {
+    vertical-align: middle;
+    margin-top: -2px; 
+}
+
+.content-wrapper.active { }
+
+
+/* Styles for Product Catalog Grid View */
+.controls-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap; 
+}
+.controls-container .left-controls, .controls-container .right-controls {
+    display: flex;
+    gap: 10px; 
+    align-items: center;
+    margin-bottom: 10px; 
+}
+#searchInput { 
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    width: 250px; 
+    line-height: initial; 
+}
+.serie-badge {
+    display: inline-block;
+    padding: 0.25em 0.6em;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    margin-bottom: 5px;
+}
+.product-description {
+    font-size: 0.85em;
+    color: #666;
+    height: 60px; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 5px; 
+}
+.product-price {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #007bff; 
+    margin-top: 5px;
+    margin-bottom: 10px; 
+}
+.product-actions button, .product-actions a.btn { 
+    margin-right: 5px; 
+}
+.product-actions .btn-sm i {
+    margin-right: 4px; 
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    border: 2px dashed #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    margin-top: 20px; 
+}
+.empty-state i { 
+    font-size: 3em;
+    color: #ccc;
+    margin-bottom: 15px;
+}
+.empty-state p {
+    font-size: 1.2em;
+    color: #777;
+    margin-bottom: 0.5rem; 
+}
+.content-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 1.5rem; 
+}
+.content-header h1 { 
+    font-size: 1.8em; 
+    color: #333;
+}
+
+#juegoFilter.form-control { 
+    min-width: 180px; 
+}
+
+.controls-container .btn i {
+    margin-right: 6px;
+}
+
+.product-actions form.inline-form {
+    margin: 0; 
+}
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); 
+  gap: 1.5rem; 
+}
+.product-card {
+  background-color: #fff;
+  border: 1px solid #e0e0e0; 
+  border-radius: 8px; 
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.07); 
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.product-card:hover {
+    transform: translateY(-5px); 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.product-card img {
+  max-width: 100%;
+  height: 160px; 
+  object-fit: contain;
+  margin-bottom: 0.75rem;
+  border-radius: 4px; 
+}
+.product-card h5.product-name { 
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  color: #333;
+  height: 40px; 
+  overflow: hidden;
+}
+.product-card p.product-code { 
+  font-size: 0.9rem;
+  color: #555; 
+  margin-bottom: 0.25rem;
+}
+
+/* Styles for Product Catalog Table View (pc_list_view.html) */
+.table-search-input { 
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    margin-bottom: 15px; 
+    display: block; 
+    line-height: initial; 
+}
+#priceTableSearchInput { 
+    width: 300px; 
+}
+
+.table-actions .btn i { 
+    margin-right: 3px; 
+}
+
+table.data-table th, table.data-table td { 
+    vertical-align: middle; 
+}
+
+table.data-table .empty-row td { 
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #777;
+}
+
+/* Styles for Juegos de Productos List View & Modal */
+.juegos-table-actions .btn {
+    margin-right: 5px;
+}
+.juegos-table-actions .btn i {
+    margin-right: 3px;
+}
+
+#juegoModal .modal-xl {
+    max-width: 1140px; 
+}
+#juegoModal .modal-body h6 {
+    font-size: 1.1em;
+    color: #4a5568; 
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+#juegoModal .modal-body hr {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+#juegoAplicacionesList .list-group-item, 
+#juegoProductosTable td {
+    font-size: 0.9em; 
+}
+#juegoAplicacionesList .list-group-item {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+#juegoProductosTable .juego-producto-cantidad {
+    padding: 0.25rem 0.5rem; 
+    font-size: 0.9em;
+}
+#juegoModal .offset-md-6 h6 { 
+    border-bottom: none; 
+    font-size: 1em;
+    color: #2c3e50;
+}
+#juegoModal dl.row dt {
+    font-weight: normal;
+    color: #555;
+}
+#juegoModal dl.row dd {
+    font-weight: bold;
+}
+
+#juegoModal .input-group .select2-container--bootstrap-5 .select2-selection--single,
+#juegoModal .select2-container--bootstrap-5 .select2-selection--single {
+    min-height: calc(1.5em + 0.5rem + 2px) !important;
+    padding: 0.25rem 0.5rem !important;
+    font-size: .875rem !important;
+    border-radius: 0.2rem !important;
+}
+#juegoModal .input-group .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow,
+#juegoModal .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+    height: calc(1.5em + 0.5rem) !important; 
+}
+#juegoModal .input-group .select2-container { 
+    flex: 1 1 auto;
+    width: 1% !important; 
+}
+
+.empty-juego-aplicaciones, .empty-juego-productos td {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    padding: 10px 0;
+}
+
+#juegoModal .modal-header > div {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-close {
+    background: transparent escape("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+    border: 0;
+    border-radius: .25rem;
+    opacity: .5;
+}
+.btn-close:hover { opacity: .75; }
+.btn-close:focus { opacity: 1; box-shadow: 0 0 0 .25rem rgba(13,110,253,.25); } 
+
+/* Styles for Pagos Pendientes Module */
+.tabs-container {
+    margin-bottom: 1.5rem;
+    background-color: #fff; 
+    padding: 0; 
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05); 
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 2px solid #dee2e6; 
+    padding: 0 1rem; 
+}
+
+.tabs .tab {
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px; 
+    font-size: 1rem;
+    color: #495057; 
+    transition: color 0.2s ease, border-bottom-color 0.2s ease;
+}
+
+.tabs .tab:hover {
+    color: #0056b3; 
+    border-bottom-color: #adb5bd; 
+}
+
+.tabs .tab.active {
+    color: #007bff; 
+    border-bottom-color: #007bff; 
+    font-weight: 600;
+}
+
+.tab-pane {
+    padding: 1.5rem; 
+}
+
+
+#pagos-pendientes-content .form-section, 
+#pagos-historial-content .form-section {
+}
+#pagos-pendientes-content .form-section h4,
+#pagos-historial-content .form-section h4 {
+}
+
+#pagos-tabla-pendientes .table-actions .btn,
+#pagos-tabla-historial .table-actions .btn { 
+}
+.btn-pagado { 
+}
+.btn-pagado:hover {
+}
+
+#pagos-buscar, #pagos-buscar-historial {
+}
+
+#pagos-tabla-pendientes tfoot td,
+#pagos-tabla-historial tfoot td {
+    font-weight: bold;
+    background-color: #f8f9fa; 
+}
+
+.btn-group-sm > .btn i {
+}
+
+.data-table tbody tr {
+    min-height: 40px; 
+}
+.data-table tbody tr td {
+}
+
+/* Specific styles for Rendicion Caja (Cash & Banks module) */
+.content-section h4 i { /* Icons in section headers */
+    margin-right: 0.5em;
+}
+
+/* Styling for badges (Ingreso/Salida) */
+.badge {
+    display: inline-block;
+    padding: .35em .65em;
+    font-size: .75em;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+}
+.bg-success { background-color: #28a745 !important; } /* Match .btn-success */
+.bg-danger { background-color: #dc3545 !important; }   /* Match .btn-danger */
+
+/* Ensure filter dropdowns in Rendicion Caja align well if in a row/group */
+#agregar-movimiento-section .row.g-3 > div,
+#reporte-diario-section .row.g-3 > div,
+#historial-completo-section .row.g-3 > div {
+    display: flex;
+    flex-direction: column; /* Stack label and select/input */
+    justify-content: flex-end; /* Align items to bottom if heights vary */
+}
+#agregar-movimiento-section .row.g-3 .col-md-auto { /* For buttons */
+    align-self: flex-end; /* Align button div itself to bottom */
+}
+
+/* Initial state for conditionally shown Banco dropdowns */
+#banco-container, #verCuentaBanco-container {
+    display: none; 
+}
+
+/* Alert styling from Bootstrap for the info message */
+.alert {
+    position: relative;
+    padding: 1rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+}
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+.alert-info .alert-link {
+    color: #062c33;
+}
+.alert i { /* Icon in alert */
+    margin-right: 0.5em;
+}
+
+```

@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ title }} - Sistema ERP{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>{{ title }}</h1>
+    <button type="button" class="btn btn-primary" id="btnAgregarTercero">
+        <i class="fas fa-plus"></i> Agregar Tercero
+    </button>
+</div>
+
+<div class="table-responsive-wrapper mt-3"> {# Added margin-top for spacing #}
+    <table class="data-table table-sm" id="tercerosTable"> {# Added table-sm for smaller padding #}
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>DNI/RUC</th>
+                <th>Dirección Principal</th>
+                <th>Dpto. Envío</th>
+                <th>Agencia Envío</th>
+                <th>Notas Envío</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th style="width: 15%;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tercerosTableBody">
+            {% if terceros %}
+                {% for tercero in terceros %}
+                <tr data-id="{{ tercero.id }}">
+                    <td>{{ tercero.nombre }}</td>
+                    <td>{{ tercero.dni | default('-', true) }}</td>
+                    <td>{{ tercero.direccion_principal | default('-', true) }}</td>
+                    <td>{{ tercero.envio_departamento | default('-', true) }}</td>
+                    <td>{{ tercero.envio_agencia | default('-', true) }}</td>
+                    <td>{{ tercero.envio_notas | default('-', true) }}</td>
+                    <td>{{ tercero.telefono | default('-', true) }}</td>
+                    <td>{{ tercero.email | default('-', true) }}</td>
+                    <td class="table-actions">
+                        <button type="button" class="btn btn-warning btn-sm btnEditarTercero" data-id="{{ tercero.id }}"><i class="fas fa-edit"></i> Editar</button>
+                        <button type="button" class="btn btn-danger btn-sm btnEliminarTercero" data-id="{{ tercero.id }}"><i class="fas fa-trash"></i> Eliminar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr class="empty-row"> {# Added class for styling if needed #}
+                    <td colspan="9" class="text-center" style="padding: 20px;">No hay terceros registrados.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{# Include the modal partial #}
+{% include 'terceros/_tercero_modal.html' %}
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/terceros_modal.js') }}"></script>
+{% endblock %}
+```

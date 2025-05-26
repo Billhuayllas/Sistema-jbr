@@ -1,0 +1,207 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Pendientes de Pago - Sistema ERP
+{% endblock %}
+
+{% block content %}
+<div class="content-header"> {# Use existing .content-header or a new specific one if needed #}
+    <h1>SISTEMA DE PENDIENTES DE PAGO</h1>
+</div>
+
+<div class="tabs-container"> {# A container for tabs #}
+    <div class="tabs">
+        <div class="tab active" data-tab-target="#pagos-pendientes-content" id="pagos-tab-pendientes">Pendientes</div>
+        <div class="tab" data-tab-target="#pagos-historial-content" id="pagos-tab-historial">Historial</div>
+    </div>
+
+    <div id="pagos-pendientes-content" class="tab-pane active">
+        {# Add New Entry Form #}
+        <div class="form-section mb-4 p-3 border rounded"> {# Added some Bootstrap-like classes for styling #}
+            <h4>Registrar Nuevo Pendiente</h4>
+            <form id="addPendingEntryForm" method="POST" action="{{ url_for('accounts_receivable_bp.add_entry') }}"> {# Ensure this route exists and matches #}
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="pagos-fecha" class="form-label">Fecha Registro</label>
+                        <input type="date" class="form-control form-control-sm" id="pagos-fecha" name="date" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="pagos-tercero" class="form-label">Cliente/Tercero (*)</label>
+                        <select class="form-select form-select-sm" id="pagos-tercero" name="tercero_id" required>
+                            <option value="">-- Seleccione Cliente/Tercero --</option>
+                            {% if all_terceros %}
+                                {% for tercero_item in all_terceros %}
+                                    <option value="{{ tercero_item.id }}">{{ tercero_item.nombre }} ({{ tercero_item.dni | default('N/A') }})</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="" disabled>No hay terceros para seleccionar. Agregue desde el módulo de Terceros.</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="pagos-descripcion" class="form-label">Descripción (*)</label>
+                        <input type="text" class="form-control form-control-sm" id="pagos-descripcion" name="descripcion" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="pagos-total" class="form-label">Total ($) (*)</label>
+                        <input type="number" class="form-control form-control-sm" id="pagos-total" name="total" step="0.01" required>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary btn-sm" id="pagos-btn-agregar"><i class="fas fa-plus"></i> Agregar</button>
+                </div>
+            </form>
+        </div>
+
+        {# Search Bar #}
+        <div class="mb-3">
+            <input type="text" class="form-control form-control-sm" id="pagos-buscar" placeholder="Buscar por tercero, fecha o descripción...">
+        </div>
+
+        {# Table for Pending Payments #}
+        <div class="table-responsive-wrapper">
+            <table class="data-table" id="pagos-tabla-pendientes">
+                <thead>
+                    <tr>
+                        <th>FECHA REG.</th>
+                        <th>TERCERO (CLIENTE/DEUDOR)</th>
+                        <th>DESCRIPCIÓN</th>
+                        <th class="text-end">TOTAL</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="pagos-pendientes-body">
+                    {% if pending_entries %}
+                        {% for entry in pending_entries %}
+                        <tr data-id="{{ entry.id }}">
+                            <td>{{ entry.date }}</td> 
+                            <td>{{ entry.tercero_nombre | default(entry.name if entry.name else 'N/A', true) }}</td> {# Display enriched tercero_nombre, fallback to old 'name' or N/A #}
+                            <td>{{ entry.descripcion }}</td>
+                            <td class="text-end">${{ "%.2f"|format(entry.total|float) }}</td>
+                            <td class="table-actions">
+                                {# The 'Editar' button will trigger a modal via JS #}
+                                <button type="button" class="btn btn-sm btn-warning btnEditarAR" data-id="{{ entry.id }}"><i class="fas fa-edit"></i> Editar</button> {# Changed to button for JS modal handling #}
+                                <form method="POST" action="{{ url_for('accounts_receivable_bp.delete_entry_route', entry_id=entry.id) }}" class="inline-form">
+                                    <button type="submit" class="btn btn-sm btn-danger btnEliminarAR" data-entry-id="{{ entry.id }}"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                                </form>
+                                <button class="btn btn-sm btn-success btn-pagado" data-id="{{ entry.id }}"><i class="fas fa-check-circle"></i> Pagado</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr class="empty-row"><td colspan="5">No hay pagos pendientes.</td></tr>
+                    {% endif %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end fw-bold">TOTAL PENDIENTE:</td>
+                        <td class="text-end fw-bold" id="pagos-suma-total">${{ "%.2f"|format(total_pending_amount|float if total_pending_amount is not none else 0.0) }}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        {# Info Message & Action Buttons (Placeholders) #}
+        <div class="mt-3">
+            <p class="text-muted"><small>Los datos se guardan automáticamente al agregar, editar o marcar como pagado.</small></p>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Acciones Pendientes">
+                <button type="button" class="btn btn-outline-secondary" id="btnExportarPendientesJSON"><i class="fas fa-file-code"></i> Exportar JSON</button>
+                <button type="button" class="btn btn-outline-secondary" id="btnExportarPendientesCSV"><i class="fas fa-file-csv"></i> Exportar CSV</button>
+                <button type="button" class="btn btn-outline-secondary" id="btnImportarPendientesJSON"><i class="fas fa-file-import"></i> Importar JSON</button>
+                {# Import CSV might be complex #}
+                <button type="button" class="btn btn-outline-info" id="btnDescargarTablaPendientesPDF"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pagos-historial-content" class="tab-pane" style="display: none;">
+        <div class="form-section mb-4 p-3 border rounded"> {# Using similar styling as "Pendientes" tab sections #}
+            <h4>Historial de Pagos</h4>
+        </div>
+
+        {# Search Bar for Historial #}
+        <div class="mb-3">
+            <input type="text" class="form-control form-control-sm" id="pagos-buscar-historial" placeholder="Buscar en historial por nombre, fecha o descripción...">
+        </div>
+
+        {# Table for Paid Payments #}
+        <div class="table-responsive-wrapper">
+            <table class="data-table" id="pagos-tabla-historial">
+                <thead>
+                    <tr>
+                        <th>FECHA PAGO</th>
+                        <th>FECHA REG.</th>
+                        <th>NOMBRE</th>
+                        <th>DESCRIPCIÓN</th>
+                        <th class="text-end">TOTAL</th>
+                        {# No actions column for paid entries as per description, but could be added #}
+                    </tr>
+                </thead>
+                <tbody id="pagos-historial-body">
+                    {% if paid_entries %}
+                        {% for entry in paid_entries %}
+                        <tr data-id="{{ entry.id }}">
+                            <td>{{ entry.payment_date }}</td> 
+                            <td>{{ entry.date }}</td> 
+                            <td>{{ entry.tercero_nombre | default(entry.name if entry.name else 'N/A', true) }}</td> {# Display enriched name, fallback to old 'name' or N/A #}
+                            <td>{{ entry.descripcion }}</td>
+                            <td class="text-end">${{ "%.2f"|format(entry.total|float) }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr class="empty-row"><td colspan="5">No hay pagos en el historial.</td></tr>
+                    {% endif %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-end fw-bold">TOTAL PAGADO:</td>
+                        <td class="text-end fw-bold" id="pagos-suma-total-historial">${{ "%.2f"|format(total_paid_amount|float if total_paid_amount is not none else 0.0) }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        {# Info Message & Action Buttons (Placeholders) for Historial #}
+        <div class="mt-3">
+            <p class="text-muted"><small>El historial muestra todos los pagos completados.</small></p>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Acciones Historial">
+                <button type="button" class="btn btn-outline-secondary" id="btnExportarHistorialJSON"><i class="fas fa-file-code"></i> Exportar Historial JSON</button>
+                <button type="button" class="btn btn-outline-secondary" id="btnExportarHistorialCSV"><i class="fas fa-file-csv"></i> Exportar Historial CSV</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Add basic tab switching JS here for now, or move to a dedicated JS file later #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.tabs .tab');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Deactivate all tabs and panes
+            tabs.forEach(t => t.classList.remove('active'));
+            tabPanes.forEach(tp => {
+                tp.classList.remove('active');
+                tp.style.display = 'none';
+            });
+
+            // Activate clicked tab and corresponding pane
+            this.classList.add('active');
+            const targetPaneId = this.dataset.tabTarget;
+            const targetPane = document.querySelector(targetPaneId);
+            if (targetPane) {
+                targetPane.classList.add('active');
+                targetPane.style.display = 'block';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/pagos_pendientes.js') }}"></script>
+{% endblock %}

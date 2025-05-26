@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}Configuración de Categorías - Sistema ERP{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Administración de Categorías</h1>
+    <button class="btn btn-primary" id="btnAgregarCategoria"><i class="fas fa-plus"></i> Agregar Categoría</button>
+</div>
+
+<div class="table-responsive-wrapper">
+    <table class="data-table" id="categoriesTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if categories_list %}
+                {% for category in categories_list %}
+                <tr data-id="{{ category.id }}">
+                    <td>{{ category.id[:8] }}...</td> {# Shortened ID for display #}
+                    <td>{{ category.nombre }}</td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-warning btnEditarCategoria" data-id="{{ category.id }}"><i class="fas fa-edit"></i> Editar</button>
+                        <button class="btn btn-sm btn-danger btnEliminarCategoria" data-id="{{ category.id }}"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr class="empty-row">
+                    <td colspan="3">No hay categorías definidas.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% include 'product_catalog/_category_modal.html' %}
+{% endblock %}
+
+{% block extra_js %}
+{# Link to config_modals.js will be added later #}
+<script>
+// Placeholder for JS interaction (event listeners for add/edit/delete buttons)
+</script>
+{% endblock %}

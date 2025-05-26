@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Backup General del Sistema - Sistema ERP
+{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Backup General del Sistema</h1>
+</div>
+
+<div class="content-wrapper"> {# Using existing content-wrapper for consistent padding/background #}
+    <p>Esta sección permite crear y restaurar un backup completo de todos los datos del sistema (Productos, Catálogo, Pagos Pendientes, Rendición Caja, etc.).</p>
+    
+    <div class="alert alert-warning mt-3 mb-4" role="alert">
+        <h4 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> ¡Atención!</h4>
+        <p>La restauración de un backup reemplazará TODOS los datos existentes en el sistema con los datos del archivo de respaldo. Esta acción no se puede deshacer.</p>
+        <hr>
+        <p class="mb-0">Asegúrese de que el archivo de backup es el correcto y, si es necesario, realice una exportación (un nuevo backup) de los datos actuales ANTES de proceder con una restauración.</p>
+    </div>
+
+    {# Export Section #}
+    <div class="content-section" id="export-section"> {# Using .content-section for styling consistency #}
+        <h4><i class="fas fa-cloud-download-alt"></i> Exportar Datos del Sistema</h4>
+        <p>Genere un archivo JSON que contiene todos los datos actuales del sistema. Guarde este archivo en un lugar seguro.</p>
+        <div class="mt-3">
+            <a href="{{ url_for('backup_bp.export_all_data_route') }}" class="btn btn-primary" id="backup-exportar-general">
+                <i class="fas fa-download"></i> Exportar Backup General (JSON)
+            </a>
+        </div>
+    </div>
+
+    {# Import Section #}
+    <div class="content-section mt-4" id="import-section">
+        <h4><i class="fas fa-cloud-upload-alt"></i> Restaurar Sistema desde Backup</h4>
+        <p>Seleccione un archivo de backup JSON previamente exportado para restaurar los datos del sistema. Todos los datos actuales serán reemplazados.</p>
+        <form id="importBackupForm" enctype="multipart/form-data"> {# Form for AJAX submission #}
+            <div class="mb-3">
+                <label for="backup-importar-general-file" class="form-label">Archivo de Backup (.json)</label>
+                <input type="file" id="backup-importar-general-file" name="backup_file" accept=".json" class="form-control" style="max-width: 450px;">
+            </div>
+            <button type="submit" id="btnImportarBackup" class="btn btn-success">
+                <i class="fas fa-upload"></i> Cargar e Importar Archivo
+            </button>
+        </form>
+    </div>
+
+    <div class="mt-4">
+        <p class="text-muted"><small>Nota: Para respaldos automáticos continuos y más robustos, se recomienda configurar rutinas de respaldo directamente en el entorno del servidor donde se ejecuta la aplicación.</small></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    {# The form's action attribute will be used by the static JS file if set. #}
+    {# If importBackupForm action is not set, JS will use a relative '/backup/import_all_data'. #}
+    {# <form id="importBackupForm" enctype="multipart/form-data" action="{{ url_for('backup_bp.import_all_data_route') }}"> #}
+    <script src="{{ url_for('static', filename='js/backup_general.js') }}"></script>
+{% endblock %}
+```

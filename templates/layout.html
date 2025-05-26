@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema ERP Repuestos{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>Repuestos Sys</h3>
+        </div>
+        <ul class="menu">
+            <li class="menu-item-header">Navegación</li>
+            <li class="menu-item">
+                <a href="#" class="parent-item"><i class="fa fa-box fa-fw"></i> Productos <i class="arrow"></i></a>
+                <ul class="submenu">
+                    <li><a href="{{ url_for('product_catalog_bp.grid_products') }}" class="submenu-item" id="menuProductosGrid"><i class="fa fa-th-large fa-fw"></i> Catálogo Grid</a></li> 
+                    <li><a href="{{ url_for('product_catalog_bp.list_products') }}" class="submenu-item" id="menuTablaPrecios"><i class="fa fa-table fa-fw"></i> Tabla Precios</a></li>
+                    <li><a href="{{ url_for('product_catalog_bp.list_juegos') }}" class="submenu-item" id="menuJuegos"><i class="fa fa-cubes fa-fw"></i> Juegos Productos</a></li>
+                </ul>
+            </li>
+            <li class="menu-item">
+                <a href="{{ url_for('accounts_receivable_bp.index') }}" class="top-level-link" id="menuPagosPendientes"><i class="fas fa-file-invoice-dollar fa-fw"></i> Pagos Pendientes</a>
+            </li>
+            <li class="menu-item">
+                <a href="{{ url_for('cash_and_banks_bp.index') }}" class="top-level-link" id="menuRendicionCaja"><i class="fas fa-cash-register fa-fw"></i> Rendición Caja</a>
+            </li>
+            <li class="menu-item-header">Administración</li>
+            <li class="menu-item">
+                <a href="#" class="parent-item"><i class="fa fa-cog fa-fw"></i> Configuración <i class="arrow"></i></a>
+                <ul class="submenu">
+                    <li><a href="{{ url_for('product_catalog_bp.list_series_view') }}" class="submenu-item" id="menuSeriesTable"><i class="fa fa-tags fa-fw"></i> Series (Tabla)</a></li>
+                    <li><a href="{{ url_for('product_catalog_bp.list_categories_view') }}" class="submenu-item" id="menuCategoriesTable"><i class="fa fa-folder fa-fw"></i> Categorías (Tabla)</a></li>
+                    <li><a href="{{ url_for('product_catalog_bp.list_marcas_view') }}" class="submenu-item" id="menuMarcasTable"><i class="fa fa-copyright fa-fw"></i> Marcas (Tabla)</a></li>
+                </ul>
+            </li>
+            <li class="menu-item">
+                <a href="{{ url_for('backup_bp.backup_general_view') }}" class="top-level-link" id="menuBackupGeneral"><i class="fas fa-save fa-fw"></i> Backup General</a>
+            </li>
+            <li class="menu-item"> {# Changed from disabled to active link #}
+                <a href="{{ url_for('terceros_bp.list_terceros_view') }}" class="top-level-link" id="menuTerceros">
+                    <i class="fas fa-users fa-fw"></i> Terceros (Clientes)
+                </a>
+            </li>
+            <li class="menu-item-header">Próximamente</li>
+            <li class="menu-item disabled"><span title="Próximamente"><i class="fas fa-shopping-cart fa-fw"></i> Compras</span></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="btnBorrarDatos" class="btn-delete-data"><i class="fas fa-trash-alt fa-fw"></i> Borrar Todos los Datos</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Flash Messages Container -->
+        <div class="flash-messages-container">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              <ul class="flashes">
+              {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+              {% endfor %}
+              </ul>
+            {% endif %}
+          {% endwith %}
+        </div>
+        
+        <div class="content-wrapper active"> {# Assuming 'active' class shows the content #}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="{{ url_for('static', filename='js/product_modal.js') }}"></script> 
+    <script src="{{ url_for('static', filename='js/config_modals.js') }}"></script> {# Added Config Modals JS #}
+    
+    <script>
+    // Basic Submenu Toggle Functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const parentItems = document.querySelectorAll('.sidebar .menu .parent-item');
+        parentItems.forEach(function (item) {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                const submenu = this.nextElementSibling;
+                if (submenu && submenu.classList.contains('submenu')) {
+                    if (submenu.style.maxHeight && submenu.style.maxHeight !== '0px') {
+                        submenu.style.maxHeight = '0px';
+                        this.classList.remove('open');
+                    } else {
+                        submenu.style.maxHeight = submenu.scrollHeight + 'px';
+                        this.classList.add('open');
+                    }
+                }
+            });
+        });
+
+        // Auto-open submenu if a submenu item is active (basic check on page load)
+        // This requires your server to add an 'active' class to the active submenu link
+        const activeSubmenuItem = document.querySelector('.sidebar .submenu .submenu-item.active');
+        if (activeSubmenuItem) {
+            const activeSubmenu = activeSubmenuItem.closest('.submenu');
+            const parentLink = activeSubmenu.previousElementSibling;
+            if (activeSubmenu && parentLink && parentLink.classList.contains('parent-item')) {
+                activeSubmenu.style.maxHeight = activeSubmenu.scrollHeight + 'px';
+                parentLink.classList.add('open');
+            }
+        }
+        
+        // Handle current page active link for top-level items
+        // This simple version checks the current URL against link hrefs
+        // More robust solution might involve passing active page from Flask
+        const currentPath = window.location.pathname;
+        const topLevelLinks = document.querySelectorAll('.sidebar .menu a.top-level-link');
+        topLevelLinks.forEach(function(link) {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+        // Also handle submenu item active state based on URL (if not already handled by server)
+        const submenuLinks = document.querySelectorAll('.sidebar .menu .submenu-item');
+         submenuLinks.forEach(function(link) {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+                // Ensure parent is open
+                const activeSubmenu = link.closest('.submenu');
+                const parentLink = activeSubmenu.previousElementSibling;
+                 if (activeSubmenu && parentLink && parentLink.classList.contains('parent-item')) {
+                    activeSubmenu.style.maxHeight = activeSubmenu.scrollHeight + 'px';
+                    parentLink.classList.add('open');
+                    parentLink.classList.add('active'); // Also mark parent as active
+                }
+            }
+        });
+
+
+    });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

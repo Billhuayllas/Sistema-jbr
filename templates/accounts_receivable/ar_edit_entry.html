@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h2>Editar Entrada de Cuenta por Cobrar</h2>
+
+  {# Flash messages are handled by layout.html #}
+
+  {% if entry %}
+  <form method="POST" action="{{ url_for('accounts_receivable_bp.edit_entry_route', entry_id=entry.id) }}">
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label for="date" class="form-label">Fecha Registro (*)</label>
+            <input type="date" class="form-control form-control-sm" id="date" name="date" value="{{ entry.date }}" required>
+        </div>
+        <div class="col-md-8 mb-3">
+            <label for="tercero_id" class="form-label">Cliente/Tercero (*)</label>
+            <select class="form-select form-select-sm" id="tercero_id" name="tercero_id" required>
+                <option value="">-- Seleccione Cliente/Tercero --</option>
+                {% if all_terceros %}
+                    {% for tercero_item in all_terceros %}
+                        {# Pre-select based on entry.tercero_id. If not available, try to match old entry.name to a tercero_item.nombre for backward compatibility. #}
+                        <option value="{{ tercero_item.id }}" 
+                                {% if entry.tercero_id == tercero_item.id %}selected{% elif not entry.tercero_id and entry.name == tercero_item.nombre %}selected{% endif %}>
+                            {{ tercero_item.nombre }} ({{ tercero_item.dni | default('N/A') }})
+                        </option>
+                    {% endfor %}
+                {% else %}
+                     <option value="" disabled>No hay terceros disponibles. Por favor, agregue terceros primero.</option>
+                {% endif %}
+            </select>
+            {# Display old name if no matching tercero_id was found and old name exists and no tercero_id is set on the entry #}
+            {% if not entry.tercero_id and entry.name %}
+                <small class="form-text text-muted">Nombre original (no vinculado): {{ entry.name }}. Seleccione un tercero de la lista para vincularlo o se perderá este nombre.</small>
+            {% elif entry.tercero_id and not all_terceros|selectattr('id', 'equalto', entry.tercero_id)|list %}
+                 {# This checks if the entry.tercero_id is not found in the all_terceros list #}
+                 <small class="form-text text-danger">¡Atención! El Tercero vinculado (ID: {{ entry.tercero_id }}) no se encuentra en la lista actual de terceros. Puede haber sido eliminado o es un dato antiguo. Por favor, seleccione un tercero válido de la lista. Guardar sin cambiarlo puede resultar en la pérdida de esta asociación si el ID no es válido.</small>
+            {% endif %}
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="descripcion" class="form-label">Descripción (*)</label>
+        <input type="text" class="form-control form-control-sm" id="descripcion" name="descripcion" value="{{ entry.descripcion }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="total" class="form-label">Total ($) (*)</label>
+        <input type="number" class="form-control form-control-sm" id="total" name="total" value="{{ entry.total|float }}" step="0.01" required>
+    </div>
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary btn-sm">Actualizar Entrada</button>
+        <a href="{{ url_for('accounts_receivable_bp.index') }}" class="btn btn-secondary btn-sm">Cancelar</a>
+    </div>
+    <p class="mt-2 text-muted"><small>(*) Campos obligatorios</small></p>
+  </form>
+  {% else %}
+  <p>Entrada no encontrada.</p>
+  <a href="{{ url_for('accounts_receivable_bp.index') }}" class="btn btn-link btn-sm">Volver a Cuentas por Cobrar</a>
+  {% endif %}
+{% endblock %}

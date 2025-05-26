@@ -1,0 +1,243 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Rendición de Caja y Bancos - Sistema ERP
+{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Rendición de Caja y Bancos</h1>
+</div>
+
+{# Section 1: Agregar Nuevo Movimiento #}
+<div class="form-section" id="agregar-movimiento-section">
+    <h4><i class="fas fa-plus-circle"></i> Agregar Nuevo Movimiento</h4>
+    <form id="addMovementForm" method="POST"> {# Action will be set by JS or to a default add route #}
+        <input type="hidden" id="transactionId" name="transactionId"> {# For editing #}
+        <div class="row g-3 align-items-end">
+            <div class="col-md-2">
+                <label for="fechaMovimiento" class="form-label">Fecha (*)</label>
+                <input type="date" class="form-control form-control-sm" id="fechaMovimiento" name="date" required value="{{ today_date }}">
+            </div>
+            <div class="col-md-2">
+                <label for="cuenta" class="form-label">Cuenta (*)</label>
+                <select class="form-select form-select-sm" id="cuenta" name="cuenta" required>
+                    <option value="Caja" selected>Caja</option>
+                    <option value="CuentaBancaria">Cuenta Bancaria</option>
+                    <option value="General">General (Otros)</option>
+                </select>
+            </div>
+            <div class="col-md-2" id="banco-container" style="display: none;">
+                <label for="banco" class="form-label">Banco (*)</label>
+                <select class="form-select form-select-sm" id="banco" name="banco">
+                    <option value="">Seleccionar Banco...</option>
+                    <option value="BCP">BCP</option>
+                    <option value="YAPE">YAPE</option>
+                    <option value="PLIN">PLIN</option>
+                    <option value="BBVA">BBVA</option>
+                    <option value="OTRO">OTRO</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="tipo" class="form-label">Tipo Mov. (*)</label>
+                <select class="form-select form-select-sm" id="tipo" name="tipo_movimiento" required>
+                    <option value="Ingreso">Ingreso</option>
+                    <option value="Salida">Salida</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="monto" class="form-label">Monto ($) (*)</label>
+                <input type="number" class="form-control form-control-sm" id="monto" name="amount" placeholder="0.00" step="0.01" required>
+            </div>
+            <div class="col-md-4"> {# Full width for description on new line or adjust col #}
+                <label for="desc" class="form-label">Descripción (*)</label>
+                <input type="text" class="form-control form-control-sm" id="desc" name="descripcion" placeholder="Ej: Saldo inicial, Venta de producto X..." required>
+            </div>
+            <div class="col-md-auto mt-3"> {# Buttons align with fields #}
+                <button type="submit" class="btn btn-primary btn-sm" id="caja-btn-agregar"><i class="fas fa-plus"></i> Agregar Movimiento</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="caja-btn-cancelar" style="display: none;"><i class="fas fa-times"></i> Cancelar Edición</button>
+            </div>
+        </div>
+         <p class="mt-2 text-muted"><small>(*) Campos obligatorios</small></p>
+    </form>
+</div>
+
+{# Section 2: Movimientos Actuales #}
+<div class="content-section mt-4" id="movimientos-actuales-section">
+    <h4><i class="fas fa-list-ul"></i> Movimientos Actuales</h4>
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-3">
+            <label for="verCuenta" class="form-label">Ver cuenta:</label>
+            <select class="form-select form-select-sm" id="verCuenta" name="ver_cuenta_filter">
+                <option value="Caja" selected>Caja</option>
+                <option value="CuentaBancaria">Cuenta Bancaria (Todos)</option>
+                {# Options for specific banks can be added by JS if needed #}
+                <option value="General">General (Otros)</option>
+                <option value="Todos">Mostrar Todos</option>
+            </select>
+        </div>
+        <div class="col-md-3" id="verCuentaBanco-container" style="display: none;">
+             <label for="verCuentaBanco" class="form-label">Filtrar Banco:</label>
+             <select class="form-select form-select-sm" id="verCuentaBanco" name="ver_cuenta_banco_filter">
+                <option value="" selected>Todos los Bancos</option>
+                <option value="BCP">BCP</option><option value="YAPE">YAPE</option><option value="PLIN">PLIN</option>
+                <option value="BBVA">BBVA</option><option value="OTRO">OTRO</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="table-responsive-wrapper">
+        <table class="data-table table-sm" id="movimientos-table">
+            <thead>
+                <tr>
+                    <th>FECHA</th>
+                    <th>DESCRIPCIÓN</th>
+                    <th>TIPO</th>
+                    <th class="text-end">MONTO</th>
+                    <th>CUENTA</th>
+                    <th>BANCO</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody id="movimientos-body">
+                {# Transactions for current_transactions (filtered by verCuenta) will be looped here by Flask/Jinja #}
+                {% if current_transactions %}
+                    {% for tx in current_transactions %}
+                    <tr data-id="{{ tx.id }}">
+                        <td>{{ tx.date }}</td>
+                        <td>{{ tx.descripcion }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if tx.tipo_movimiento == 'Ingreso' else 'danger' }}">
+                                {{ tx.tipo_movimiento }}
+                            </span>
+                        </td>
+                        <td class="text-end">${{ "%.2f"|format(tx.amount|float) }}</td>
+                        <td>{{ tx.cuenta }}</td>
+                        <td>{{ tx.banco if tx.cuenta == 'CuentaBancaria' else 'N/A' }}</td>
+                        <td class="table-actions">
+                            <button class="btn btn-sm btn-warning btnEditarMovimiento" data-id="{{ tx.id }}"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger btnEliminarMovimiento" data-id="{{ tx.id }}"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr class="empty-row"><td colspan="7">No hay movimientos para la cuenta seleccionada.</td></tr>
+                {% endif %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" class="text-end fw-bold">SALDO ACTUAL ({{ selected_account_display_name | default('Caja') }}):</td>
+                    <td class="text-end fw-bold" id="saldo-total">${{ "%.2f"|format(current_saldo|float if current_saldo is not none else 0.0) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+{# Section 3: Acciones Generales (Caja) #}
+<div class="content-section mt-4" id="acciones-generales-section">
+    <h4><i class="fas fa-cogs"></i> Acciones Generales (Caja)</h4>
+    <div class="btn-group btn-group-sm" role="group">
+        <button type="button" class="btn btn-outline-secondary" id="caja-exportar-json"><i class="fas fa-file-code"></i> Exportar Todo (JSON)</button>
+        <button type="button" class="btn btn-outline-secondary" id="caja-exportar-csv"><i class="fas fa-file-csv"></i> Exportar Todo (CSV)</button>
+        <button type="button" class="btn btn-outline-secondary" id="caja-importar-json"><i class="fas fa-file-import"></i> Importar (JSON)</button>
+        {# Import CSV might be complex #}
+        <button type="button" class="btn btn-info" id="caja-realizar-corte"><i class="fas fa-cut"></i> Realizar Corte de Caja</button>
+        <button type="button" class="btn btn-danger" id="caja-limpiar-datos"><i class="fas fa-broom"></i> Limpiar Datos Caja</button>
+    </div>
+</div>
+
+{# Section 4: Reporte Diario (Caja + Bancos) #}
+<div class="content-section mt-4" id="reporte-diario-section">
+    <h4><i class="fas fa-chart-line"></i> Reporte Diario (Caja + Bancos)</h4>
+    <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label for="caja-fechaReporte" class="form-label">Selecciona una fecha:</label>
+            <input type="date" class="form-control form-control-sm" id="caja-fechaReporte" value="{{ today_date }}">
+        </div>
+        <div class="col-md-auto">
+            <button type="button" class="btn btn-primary btn-sm" id="caja-buscar-reporte"><i class="fas fa-search"></i> Buscar Reporte</button>
+            <button type="button" class="btn btn-outline-success btn-sm" id="caja-descargar-reporte"><i class="fas fa-download"></i> Descargar Reporte (PNG)</button>
+        </div>
+    </div>
+    <div class="table-responsive-wrapper mt-3">
+        <table class="data-table table-sm" id="caja-reporte-table">
+            <thead>
+                <tr><th>FECHA</th><th>DESCRIPCIÓN</th><th>TIPO</th><th class="text-end">MONTO</th><th>CUENTA</th><th>BANCO</th></tr>
+            </thead>
+            <tbody id="caja-reporte-body">
+                {# Report transactions will be populated by JS after fetching or from initial load #}
+                {% if report_transactions_today %}
+                     {% for tx in report_transactions_today %}
+                         <tr>
+                            <td>{{ tx.date }}</td><td>{{ tx.descripcion }}</td>
+                            <td><span class="badge bg-{{ 'success' if tx.tipo_movimiento == 'Ingreso' else 'danger' }}">{{ tx.tipo_movimiento }}</span></td>
+                            <td class="text-end">${{ "%.2f"|format(tx.amount|float) }}</td>
+                            <td>{{ tx.cuenta }}</td><td>{{ tx.banco if tx.cuenta == 'CuentaBancaria' else 'N/A' }}</td>
+                         </tr>
+                     {% endfor %}
+                {% else %}
+                    <tr class="empty-row"><td colspan="6">Seleccione una fecha y haga clic en "Buscar Reporte".</td></tr>
+                {% endif %}
+            </tbody>
+            <tfoot>
+                <tr><td colspan="5" class="text-end fw-bold">Neto Efectivo (Caja):</td><td class="text-end fw-bold" id="caja-neto-caja">${{ "%.2f"|format(report_neto_caja_today|float if report_neto_caja_today is not none else 0.0) }}</td></tr>
+                <tr><td colspan="5" class="text-end fw-bold">Neto Bancario:</td><td class="text-end fw-bold" id="caja-neto-bancario">${{ "%.2f"|format(report_neto_bancario_today|float if report_neto_bancario_today is not none else 0.0) }}</td></tr>
+                <tr><td colspan="5" class="text-end fw-bold">Total Neto (Global):</td><td class="text-end fw-bold" id="caja-neto-global">${{ "%.2f"|format(report_neto_global_today|float if report_neto_global_today is not none else 0.0) }}</td></tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+{# Section 5: Historial Completo de Movimientos #}
+<div class="content-section mt-4" id="historial-completo-section">
+    <h4><i class="fas fa-history"></i> Historial Completo de Movimientos</h4>
+     <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label for="caja-fechaHistorial" class="form-label">Buscar por fecha:</label>
+            <input type="date" class="form-control form-control-sm" id="caja-fechaHistorial">
+        </div>
+        <div class="col-md-auto">
+            <button type="button" class="btn btn-primary btn-sm" id="caja-buscar-historial"><i class="fas fa-search"></i> Buscar en Historial</button>
+            <button type="button" class="btn btn-outline-success btn-sm" id="caja-descargar-historial"><i class="fas fa-download"></i> Descargar Historial (PNG)</button>
+        </div>
+    </div>
+    <div class="table-responsive-wrapper mt-3">
+        <table class="data-table table-sm" id="caja-historial-table">
+            <thead>
+                <tr><th>FECHA</th><th>DESCRIPCIÓN</th><th>TIPO</th><th class="text-end">MONTO</th><th>CUENTA</th><th>BANCO</th></tr>
+            </thead>
+            <tbody id="caja-historial-body">
+                {# All transactions will be populated here by Flask/Jinja initially #}
+                {% if all_transactions_for_historial %}
+                    {% for tx in all_transactions_for_historial %}
+                         <tr>
+                            <td>{{ tx.date }}</td><td>{{ tx.descripcion }}</td>
+                            <td><span class="badge bg-{{ 'success' if tx.tipo_movimiento == 'Ingreso' else 'danger' }}">{{ tx.tipo_movimiento }}</span></td>
+                            <td class="text-end">${{ "%.2f"|format(tx.amount|float) }}</td>
+                            <td>{{ tx.cuenta }}</td><td>{{ tx.banco if tx.cuenta == 'CuentaBancaria' else 'N/A' }}</td>
+                         </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr class="empty-row"><td colspan="6">No hay transacciones en el historial.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{# Info Message #}
+<div class="alert alert-info mt-4" role="alert">
+    <i class="fas fa-info-circle"></i> <strong>Nota:</strong> Los datos de esta sección se guardan directamente en el servidor. Las funciones de importación/exportación y limpieza de datos deben usarse con precaución.
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Pass today's date to JS if needed for default date input values, though HTML handles it too.
+    const initialTodayDate = "{{ today_date }}"; 
+</script>
+<script src="{{ url_for('static', filename='js/rendicion_caja.js') }}"></script>
+{% endblock %}
+```

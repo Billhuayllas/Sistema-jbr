@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Bienvenido - Sistema ERP
+{% endblock %}
+
+{% block content %}
+    <div class="content-header">
+        {# This can be a block that specific pages can override #}
+        <h1>Bienvenido al Sistema ERP</h1>
+    </div>
+    <p>Seleccione una opción del menú lateral para comenzar.</p>
+    
+    {# Example of how a page might use a card or box for content #}
+    <div class="info-box">
+        <h2>Estado General</h2>
+        <p>Aquí se podría mostrar un resumen del sistema o alertas importantes.</p>
+        <p>Por ejemplo:
+            <ul>
+                <li>Productos activos: {{ product_count | default('N/A') }}</li>
+                <li>Cuentas por cobrar: {{ ar_count | default('N/A') }}</li>
+                <li>Saldo en caja: {{ cash_total | default('N/A') }}</li>
+            </ul>
+        </p>
+        <p><em>(Estos datos son ilustrativos y necesitarían ser cargados desde el backend).</em></p>
+    </div>
+
+    <style>
+        /* Specific styles for index.html if needed, or move to style.css */
+        .content-header h1 {
+            font-size: 1.8em; /* Slightly smaller than main sidebar header */
+            color: #333;
+        }
+        .info-box {
+            background-color: #f9f9f9;
+            border: 1px solid #e3e3e3;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        .info-box h2 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Any specific JS for the index page can go here.
+    // For example, if you wanted to make the "active" link in the sidebar
+    // more dynamically set based on a general "dashboard" view.
+    // For now, the layout.html script handles active link highlighting based on URL.
+</script>
+{% endblock %}

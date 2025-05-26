@@ -1,0 +1,170 @@
+{# Modal Structure based on user's description #}
+<div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document"> {# modal-lg for a wider modal #}
+        <div class="modal-content">
+            <form id="productForm" method="POST" enctype="multipart/form-data">
+                <input type="hidden" id="productId" name="productId"> {# For editing #}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalLabel">Agregar Producto</h5>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-secondary" id="btnNuevoProductoModal">Nuevo</button>
+                        <button type="submit" class="btn btn-sm btn-primary" id="btnGuardarProductoModal">Guardar</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> {# Bootstrap 5 close button #}
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="productModalTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="tab-datos-principales" data-bs-toggle="tab" data-bs-target="#tabDatos" type="button" role="tab" aria-controls="tabDatos" aria-selected="true">Datos Principales</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-imagenes" data-bs-toggle="tab" data-bs-target="#tabImagenes" type="button" role="tab" aria-controls="tabImagenes" aria-selected="false">Imágenes</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-aplicaciones" data-bs-toggle="tab" data-bs-target="#tabAplicaciones" type="button" role="tab" aria-controls="tabAplicaciones" aria-selected="false">Aplicaciones (Legado)</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="productModalTabContent" style="padding-top: 15px;">
+                        {# Datos Principales Tab #}
+                        <div class="tab-pane fade show active" id="tabDatos" role="tabpanel" aria-labelledby="tab-datos-principales">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="productCode" class="form-label">Código Producto (*)</label>
+                                    <input type="text" class="form-control form-control-sm" id="productCode" name="product_code" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="productName" class="form-label">Nombre Producto (*)</label>
+                                    <input type="text" class="form-control form-control-sm" id="productName" name="name" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="productBrand" class="form-label">Marca (*)</label>
+                                    <select class="form-select form-select-sm" id="productBrand" name="brand_code" required>
+                                        <option value="">Seleccionar Marca...</option>
+                                        {% for brand in brands_list %}
+                                            <option value="{{ brand.code }}">{{ brand.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="productCategory" class="form-label">Categoría (*)</label>
+                                    <select class="form-select form-select-sm" id="productCategory" name="category_code" required>
+                                        <option value="">Seleccionar Categoría...</option>
+                                        {% for category in categories_list %}
+                                            <option value="{{ category.code }}">{{ category.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="productSeries" class="form-label">Serie/Juego (*)</label>
+                                    <select class="form-select form-select-sm" id="productSeries" name="series" required>
+                                        <option value="">Seleccionar Serie/Juego...</option>
+                                        {% for series_item in series_list_for_dropdown %}
+                                            <option value="{{ series_item.code }}">{{ series_item.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="productMeasure" class="form-label">Medida</label>
+                                    <input type="text" class="form-control form-control-sm" id="productMeasure" name="measurement">
+                                </div>
+                                 <div class="col-md-4 mb-3">
+                                    <label for="productStock" class="form-label">Stock Actual</label>
+                                    <input type="number" class="form-control form-control-sm" id="productStock" name="stock" step="1" value="0">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="productCost" class="form-label">Costo ($)</label>
+                                    <input type="number" class="form-control form-control-sm" id="productCost" name="cost" step="0.01">
+                                </div>
+                            </div>
+                             <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="productPriceUnit" class="form-label">Precio Venta Unitario ($)</label>
+                                    <input type="number" class="form-control form-control-sm" id="productPriceUnit" name="price_unit" step="0.01">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="productPriceWholesale" class="form-label">Precio Venta Mayorista ($)</label>
+                                    <input type="number" class="form-control form-control-sm" id="productPriceWholesale" name="price_wholesale" step="0.01">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productDescription" class="form-label">Descripción</label>
+                                <textarea class="form-control form-control-sm" id="productDescription" name="description" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        {# Imágenes Tab #}
+                        <div class="tab-pane fade" id="tabImagenes" role="tabpanel" aria-labelledby="tab-imagenes">
+                            <div class="row">
+                                {% for i in range(1, 6) %}
+                                <div class="col-md-4 mb-3"> {# Adjust col size for layout #}
+                                    <label for="productImage{{i}}" class="form-label">Imagen {{i}}</label>
+                                    <input type="file" class="form-control form-control-sm product-image-input" id="productImage{{i}}" name="productImage{{i}}" accept="image/*" data-slot="{{i-1}}">
+                                    <img id="imagePreview{{i}}" src="#" alt="Vista previa de imagen {{i}}" class="img-thumbnail mt-2" style="display:none; max-height: 150px;">
+                                    <button type="button" class="btn btn-sm btn-outline-danger mt-1 remove-image-btn" data-slot="{{i-1}}" style="display:none;">Eliminar Imagen</button>
+                                    <input type="hidden" id="currentImageFilename{{i-1}}" name="currentImageFilename{{i-1}}" value="">
+                                    <input type="checkbox" class="form-check-input remove-image-checkbox" id="removeImage{{i-1}}" name="removeImage{{i-1}}" value="yes" style="display:none;" data-slot="{{i-1}}">
+                                    {# Hidden checkbox to signal removal of an existing image on server #}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        {# Aplicaciones (Legado) Tab #}
+                        <div class="tab-pane fade" id="tabAplicaciones" role="tabpanel" aria-labelledby="tab-aplicaciones">
+                            <h5>Agregar Aplicación</h5>
+                            <div class="row g-2 align-items-end"> {# g-2 for smaller gaps #}
+                                <div class="col-md-3">
+                                    <label for="vehicleInput" class="form-label">Vehículo</label>
+                                    <input type="text" class="form-control form-control-sm" id="vehicleInput">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="brandInputAplicacion" class="form-label">Marca Vehículo</label> {# Changed ID to avoid conflict #}
+                                    <input type="text" class="form-control form-control-sm" id="brandInputAplicacion">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="gameCodeInput" class="form-label">Código Juego</label>
+                                    <input type="text" class="form-control form-control-sm" id="gameCodeInput">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="gameNameInput" class="form-label">Nombre Juego</label>
+                                    <input type="text" class="form-control form-control-sm" id="gameNameInput">
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-sm btn-success" id="addApplicationBtn" style="width:100%"><i class="fas fa-plus"></i></button>
+                                </div>
+                            </div>
+                            <hr>
+                            <h5>Aplicaciones Agregadas</h5>
+                            <ul id="applicationsList" class="list-group list-group-flush">
+                                {# Aplicaciones will be added here by JS #}
+                                <li class="list-group-item empty-aplicaciones" style="display:none;">No hay aplicaciones agregadas.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span class="me-auto text-muted"><small>(*) Campos obligatorios</small></span>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    {# Guardar button is in header #}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# Template for new aplicacion item (used by JS) #}
+<template id="aplicacionItemTemplate">
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+            <strong class="aplicacion-vehiculo"></strong> (<span class="aplicacion-marca"></span>)
+            <br>
+            <small class="text-muted">Juego: <span class="aplicacion-nombrejuego"></span> (Cod: <span class="aplicacion-codigojuego"></span>)</small>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-danger remove-aplicacion-btn"><i class="fas fa-trash-alt"></i></button>
+    </li>
+</template>
+```
